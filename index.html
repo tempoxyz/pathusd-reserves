@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A point-in-time report on pathUSD supply, reserves, and liquidity using Bridge transparency APIs and Tempo RPC."
+    />
+    <title>pathUSD Reserves</title>
+    <style>
+      :root {
+        --ink: #171912;
+        --muted: #696d62;
+        --paper: #f5f4ed;
+        --card: #fffef8;
+        --line: #d9d8ce;
+        --green: #1c6a43;
+        --green-soft: #dcecdf;
+        --gold: #b6822f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 100% 0%, #e1eadc 0, transparent 28rem),
+          var(--paper);
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 64px 0 96px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        align-items: end;
+        padding-bottom: 32px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .eyebrow,
+      .label {
+        margin: 0 0 10px;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(48px, 8vw, 88px);
+        font-weight: 500;
+        letter-spacing: -0.055em;
+        line-height: 0.98;
+      }
+
+      h2 {
+        margin-bottom: 22px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 32px;
+        font-weight: 500;
+        letter-spacing: -0.025em;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .subtitle,
+      .timestamp,
+      .note {
+        color: var(--muted);
+      }
+
+      .subtitle {
+        max-width: 650px;
+        margin-bottom: 0;
+        font-size: 18px;
+      }
+
+      .timestamp {
+        margin: 0;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      section {
+        padding-top: 56px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+
+      .metric,
+      .panel {
+        background: color-mix(in srgb, var(--card) 92%, transparent);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+      }
+
+      .metric {
+        min-height: 174px;
+        padding: 22px;
+      }
+
+      .metric.primary {
+        color: #f6f5ed;
+        background: var(--green);
+        border-color: var(--green);
+      }
+
+      .metric.primary .label,
+      .metric.primary .detail {
+        color: #cfe4d5;
+      }
+
+      .value {
+        margin: 20px 0 8px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(29px, 3vw, 42px);
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+
+      .detail {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .coverage {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 16px;
+      }
+
+      .panel {
+        padding: 28px;
+      }
+
+      .bar {
+        display: flex;
+        height: 48px;
+        margin: 24px 0 16px;
+        overflow: hidden;
+        background: #e8e7df;
+        border-radius: 7px;
+      }
+
+      .bar-money {
+        width: 90.1606%;
+        background: var(--green);
+      }
+
+      .bar-cash {
+        width: 9.8394%;
+        background: var(--gold);
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        margin-right: 7px;
+        border-radius: 50%;
+      }
+
+      .dot.green {
+        background: var(--green);
+      }
+
+      .dot.gold {
+        background: var(--gold);
+      }
+
+      .callout {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        justify-content: space-between;
+        background: var(--green-soft);
+        border-color: #bdd5c3;
+      }
+
+      .callout strong {
+        display: block;
+        margin-bottom: 8px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 54px;
+        font-weight: 500;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      table {
+        width: 100%;
+        overflow: hidden;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 14px;
+      }
+
+      th,
+      td {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      th:not(:first-child),
+      td:not(:first-child) {
+        text-align: right;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .two-column p:last-child,
+      .panel p:last-child {
+        margin-bottom: 0;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      li + li {
+        margin-top: 9px;
+      }
+
+      code {
+        padding: 2px 5px;
+        background: #ecebe3;
+        border-radius: 4px;
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 0.86em;
+        overflow-wrap: anywhere;
+      }
+
+      a {
+        color: var(--green);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      .api-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .api-list code {
+        display: block;
+        padding: 12px 14px;
+        background: #252820;
+        color: #e9eee4;
+      }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        margin-top: 64px;
+        padding-top: 24px;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+      }
+
+      @media (max-width: 900px) {
+        .hero-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .coverage,
+        .two-column {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 560px) {
+        main {
+          width: min(100% - 24px, 1120px);
+          padding-top: 36px;
+        }
+
+        header {
+          grid-template-columns: 1fr;
+        }
+
+        .timestamp {
+          text-align: left;
+        }
+
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .metric {
+          min-height: 145px;
+        }
+
+        th,
+        td {
+          padding: 14px 12px;
+        }
+
+        footer {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">Tempo · Reserve transparency report</p>
+          <h1>pathUSD Reserves</h1>
+          <p class="subtitle">
+            A point-in-time view of supply, backing assets, and Bridge liquidity,
+            reconciled against the Tempo network.
+          </p>
+        </div>
+        <p class="timestamp">Snapshot<br /><strong>July 30, 2026 · 00:14 UTC</strong></p>
+      </header>
+
+      <section aria-labelledby="overview-title">
+        <h2 id="overview-title">Reserve position</h2>
+        <div class="hero-grid">
+          <article class="metric primary">
+            <p class="label">Coverage</p>
+            <p class="value">100.00000017%</p>
+            <p class="detail">Reported reserves ÷ total supply</p>
+          </article>
+          <article class="metric">
+            <p class="label">Total supply</p>
+            <p class="value">23.985M</p>
+            <p class="detail">23,985,060.599981 pathUSD</p>
+          </article>
+          <article class="metric">
+            <p class="label">Reserve assets</p>
+            <p class="value">$23.985M</p>
+            <p class="detail">$23,985,060.64 reported by Bridge</p>
+          </article>
+          <article class="metric">
+            <p class="label">Surplus</p>
+            <p class="value">$0.040019</p>
+            <p class="detail">Reserves above outstanding supply</p>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="composition-title">
+        <h2 id="composition-title">Reserve composition</h2>
+        <div class="coverage">
+          <article class="panel">
+            <p class="label">Backing assets</p>
+            <div class="bar" aria-label="90.1606% managed money market and 9.8394% cash">
+              <div class="bar-money" title="Managed money market: 90.1606%"></div>
+              <div class="bar-cash" title="Cash: 9.8394%"></div>
+            </div>
+            <div class="legend">
+              <span><i class="dot green"></i>Managed money market · 90.1606%</span>
+              <span><i class="dot gold"></i>Cash · 9.8394%</span>
+            </div>
+            <table style="margin-top: 28px">
+              <thead>
+                <tr><th>Asset class</th><th>Amount</th><th>Share</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Managed money market</td><td>$21,625,081.54</td><td>90.1606%</td></tr>
+                <tr><td>Cash</td><td>$2,359,979.10</td><td>9.8394%</td></tr>
+                <tr><td><strong>Total</strong></td><td><strong>$23,985,060.64</strong></td><td><strong>100%</strong></td></tr>
+              </tbody>
+            </table>
+          </article>
+          <aside class="panel callout">
+            <div>
+              <p class="label">Configured liquidity target</p>
+              <strong>10%</strong>
+              <p>Actual cash allocation is 9.84%, closely tracking the target.</p>
+            </div>
+            <p class="note">
+              The API returned an allocation minimum of <code>100000000</code> in raw units.
+              Bridge's documentation does not clearly identify the unit convention, so this
+              report does not assign it a dollar value.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section aria-labelledby="inventory-title">
+        <h2 id="inventory-title">Liquidity and inventory</h2>
+        <div class="two-column">
+          <article class="panel">
+            <p class="label">Bridge orchestration inventory</p>
+            <p class="value">70,059.83</p>
+            <p>pathUSD available to Bridge's Orchestration system on Tempo.</p>
+            <p class="note">This represents 0.2921% of total supply.</p>
+          </article>
+          <article class="panel">
+            <p class="label">Canonical asset</p>
+            <h3>pathUSD on Tempo</h3>
+            <p><code>0x20C0000000000000000000000000000000000000</code></p>
+            <p class="note">
+              Bridge's supply response exactly matched the contract's onchain
+              <code>totalSupply()</code> at Tempo block 32,346,775.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="structure-title">
+        <h2 id="structure-title">Reported structure and safeguards</h2>
+        <div class="two-column">
+          <article class="panel">
+            <ul>
+              <li>Bridge is the issuer and manages minting, burning, and reserves.</li>
+              <li>Bridge states that tokens are backed at least 1:1 by equivalent USD-value assets.</li>
+              <li>Reserves are described as held in segregated, bankruptcy-remote accounts for token holders.</li>
+              <li>Bridge names BlackRock and Fidelity among its reserve-management and custody partners.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <ul>
+              <li>Cash supports rapid business-hours redemptions.</li>
+              <li>Money-market and treasury allocations generate earnings and may take up to one business day to redeem.</li>
+              <li>Bridge describes short-dated Treasuries, overnight Treasury repos, money-market funds, and cash as eligible portfolio assets.</li>
+              <li>The live pathUSD API reports only the higher-level asset classes shown in this report.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="reporting-title">
+        <h2 id="reporting-title">Reporting and assurance</h2>
+        <div class="two-column">
+          <article class="panel">
+            <h3>What Bridge provides</h3>
+            <ul>
+              <li>Real-time APIs for supply, reserve composition, and inventory.</li>
+              <li>Monthly reports covering transaction activity, balances, and earnings.</li>
+              <li>Quarterly independent-accountant attestations, offered subject to an additional fee.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>Important limitation</h3>
+            <p>
+              No public pathUSD-specific attestation or monthly report was found through
+              Bridge's documented API surface. The live figures establish an issuer-reported
+              reserve-to-supply match, but they are not themselves an independently audited snapshot.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="method-title">
+        <h2 id="method-title">Method and APIs</h2>
+        <article class="panel">
+          <p>
+            Read-only requests were made to Bridge's production API using the canonical
+            currency identifier <code>path_usd</code>. No mutation endpoints were called.
+            Onchain supply was independently checked using Tempo's public JSON-RPC endpoint.
+          </p>
+          <div class="api-list">
+            <code>GET /v0/transparency/path_usd/supply</code>
+            <code>GET /v0/transparency/path_usd/reserves</code>
+            <code>GET /v0/transparency/path_usd/inventory</code>
+            <code>GET /v0/issuance/reserves/liquidity_allocation</code>
+            <code>POST https://rpc.tempo.xyz · eth_blockNumber, eth_call totalSupply()</code>
+          </div>
+        </article>
+      </section>
+
+      <footer>
+        <span>Point-in-time informational report · Values may change after the snapshot.</span>
+        <span>
+          Sources:
+          <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency">Bridge transparency</a>
+          ·
+          <a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management">reserve management</a>
+        </span>
+      </footer>
+    </main>
+  </body>
+</html>
