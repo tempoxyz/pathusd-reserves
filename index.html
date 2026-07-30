@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="A point-in-time report on pathUSD supply, reserves, and liquidity using Bridge transparency APIs and Tempo RPC."
+      content="A live report on pathUSD supply, reserves, and liquidity using Bridge transparency APIs and Tempo RPC."
     />
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0c0c0c" media="(prefers-color-scheme: dark)" />
@@ -163,6 +163,11 @@
       .tag-positive {
         color: var(--positive);
         background: var(--positive-subtle);
+      }
+
+      .tag-warning {
+        color: var(--warning);
+        background: var(--warning-subtle);
       }
 
       .tag-dot {
@@ -691,12 +696,12 @@
           <span class="brand">Tempo · Reserve transparency</span>
           <div class="header-meta">
             <span class="tag"><span class="tag-dot"></span>Tempo</span>
-            <span class="tag tag-positive"><span class="tag-dot"></span>Fully backed</span>
+            <span class="tag" id="report-status" aria-live="polite"><span class="tag-dot"></span>Snapshot</span>
           </div>
         </div>
         <h1>pathUSD Reserves</h1>
         <p class="subtitle">
-          A point-in-time view of pathUSD supply, backing assets, and Bridge liquidity,
+          A live, cached view of pathUSD supply, backing assets, and Bridge liquidity,
           reconciled against the Tempo network.
         </p>
       </header>
@@ -704,14 +709,14 @@
       <section aria-labelledby="position-title">
         <div class="section-heading">
           <h2 id="position-title">Reserve position</h2>
-          <p class="section-kicker">Snapshot · 2026-07-30 00:14 UTC</p>
+          <p class="section-kicker" id="snapshot-time">Snapshot · 2026-07-30 00:14 UTC</p>
         </div>
 
         <div class="summary">
           <article class="box coverage">
             <div>
               <p class="coverage-label">Reserve coverage</p>
-              <p class="coverage-value">100.00000017%</p>
+              <p class="coverage-value" id="coverage-value">100.00000017%</p>
             </div>
             <p class="coverage-detail">Reported reserve assets divided by total pathUSD supply.</p>
           </article>
@@ -719,11 +724,11 @@
           <div class="box summary-side">
             <div class="summary-row">
               <span>Reserve assets</span>
-              <strong class="summary-value">$23,985,060.64</strong>
+              <strong class="summary-value" id="reserve-total">$23,985,060.64</strong>
             </div>
             <div class="summary-row">
               <span>Total supply</span>
-              <strong class="summary-value">23,985,060.599981</strong>
+              <strong class="summary-value" id="supply-total">23,985,060.599981</strong>
             </div>
           </div>
         </div>
@@ -732,29 +737,29 @@
           <article class="box metric">
             <p class="metric-label">Reserve surplus</p>
             <div>
-              <p class="metric-value">$0.040019</p>
+              <p class="metric-value" id="reserve-surplus">$0.040019</p>
               <p class="metric-detail">Assets above outstanding supply</p>
             </div>
           </article>
           <article class="box metric">
             <p class="metric-label">Money market</p>
             <div>
-              <p class="metric-value">90.1606%</p>
-              <p class="metric-detail">$21,625,081.54</p>
+              <p class="metric-value" id="money-market-percent">90.1606%</p>
+              <p class="metric-detail" id="money-market-amount">$21,625,081.54</p>
             </div>
           </article>
           <article class="box metric">
             <p class="metric-label">Cash</p>
             <div>
-              <p class="metric-value">9.8394%</p>
-              <p class="metric-detail">$2,359,979.10</p>
+              <p class="metric-value" id="cash-percent">9.8394%</p>
+              <p class="metric-detail" id="cash-amount">$2,359,979.10</p>
             </div>
           </article>
           <article class="box metric">
             <p class="metric-label">Bridge inventory</p>
             <div>
-              <p class="metric-value">70,059.83</p>
-              <p class="metric-detail">0.2921% of total supply</p>
+              <p class="metric-value" id="inventory-amount">70,059.83</p>
+              <p class="metric-detail" id="inventory-percent">0.2921% of total supply</p>
             </div>
           </article>
         </div>
@@ -774,11 +779,12 @@
             </div>
             <div
               class="composition-chart"
+              id="composition-chart"
               role="img"
               aria-label="Reserve composition: 90.1606% managed money market and 9.8394% cash"
             >
-              <span class="composition-money"></span>
-              <span class="composition-cash"></span>
+              <span class="composition-money" id="composition-money"></span>
+              <span class="composition-cash" id="composition-cash"></span>
             </div>
             <div class="legend">
               <span class="legend-item"><i class="legend-dot legend-money"></i>Managed money market</span>
@@ -787,15 +793,15 @@
             <div class="rows">
               <div class="row">
                 <span class="row-label">Managed money market</span>
-                <span class="row-value">$21,625,081.54 · 90.1606%</span>
+                <span class="row-value" id="money-market-row">$21,625,081.54 · 90.1606%</span>
               </div>
               <div class="row">
                 <span class="row-label">Cash</span>
-                <span class="row-value">$2,359,979.10 · 9.8394%</span>
+                <span class="row-value" id="cash-row">$2,359,979.10 · 9.8394%</span>
               </div>
               <div class="row">
                 <span class="row-label">Total reserves</span>
-                <strong class="row-value">$23,985,060.64</strong>
+                <strong class="row-value" id="reserve-total-row">$23,985,060.64</strong>
               </div>
             </div>
           </article>
@@ -803,13 +809,13 @@
           <aside class="box callout">
             <div>
               <p class="callout-label">Configured liquidity target</p>
-              <p class="callout-value">10%</p>
-              <p class="body-copy">Actual cash allocation is 9.84%, closely tracking the configured target.</p>
+              <p class="callout-value" id="liquidity-target">10%</p>
+              <p class="body-copy" id="liquidity-copy">Actual cash allocation is 9.84%, closely tracking the configured target.</p>
             </div>
             <div class="callout-note">
               <strong>Unit convention unclear</strong>
               <span>
-                The API returned an allocation minimum of <code>100000000</code> in raw units.
+                The API returned an allocation minimum of <code id="allocation-minimum">100000000</code> in raw units.
                 Bridge documentation does not define the unit, so no dollar value is assigned here.
               </span>
             </div>
@@ -820,14 +826,14 @@
       <section aria-labelledby="liquidity-title">
         <div class="section-heading">
           <h2 id="liquidity-title">Liquidity and network</h2>
-          <p class="section-kicker">Tempo block 32,346,775</p>
+          <p class="section-kicker" id="tempo-block">Tempo block 32,346,775</p>
         </div>
 
         <div class="content-grid">
           <article class="box content-card">
             <h3>Bridge orchestration inventory</h3>
-            <p class="metric-value">70,059.83 pathUSD</p>
-            <p class="body-copy">
+            <p class="metric-value" id="inventory-card-amount">70,059.83 pathUSD</p>
+            <p class="body-copy" id="inventory-copy">
               Available to Bridge's Orchestration system on Tempo. Inventory represents 0.2921%
               of total pathUSD supply and is not added to reserve assets.
             </p>
@@ -835,7 +841,7 @@
           <article class="box content-card">
             <h3>Canonical asset</h3>
             <p class="address">0x20C0000000000000000000000000000000000000</p>
-            <p class="body-copy">
+            <p class="body-copy" id="reconciliation-copy">
               Bridge's supply response exactly matched the contract's onchain
               <code>totalSupply()</code> at the snapshot block.
             </p>
@@ -905,9 +911,10 @@
           <p class="section-kicker">Read-only requests</p>
         </div>
         <p class="body-copy">
-          Bridge's production API was queried with the canonical currency identifier
-          <code>path_usd</code>. No mutation endpoints were called. Supply was independently checked
-          with Tempo's public JSON-RPC endpoint.
+          The page refreshes through a same-origin Vercel Function, keeping Bridge credentials
+          server-side. Its response is cached at the edge for five minutes and may be served stale
+          for up to one hour while it revalidates. No mutation endpoints are called. Supply is
+          independently checked with Tempo's public JSON-RPC endpoint.
         </p>
         <div class="methods">
           <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/supply</code></div>
@@ -919,7 +926,7 @@
       </section>
 
       <footer>
-        <span>Point-in-time informational report · Values may change after the snapshot.</span>
+        <span>Live informational report · API responses are cached for up to five minutes.</span>
         <span>
           Sources:
           <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency">Bridge transparency</a>
@@ -928,5 +935,89 @@
         </span>
       </footer>
     </main>
+    <script>
+      const numberFormat = (minimumFractionDigits, maximumFractionDigits = minimumFractionDigits) =>
+        new Intl.NumberFormat("en-US", { minimumFractionDigits, maximumFractionDigits });
+      const currencyFormat = (minimumFractionDigits, maximumFractionDigits = minimumFractionDigits) =>
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits,
+          maximumFractionDigits,
+        });
+
+      const setText = (id, value) => {
+        document.getElementById(id).textContent = value;
+      };
+
+      const setStatus = (label, tone = "") => {
+        const status = document.getElementById("report-status");
+        status.className = `tag${tone ? ` tag-${tone}` : ""}`;
+        status.innerHTML = '<span class="tag-dot"></span>';
+        status.append(document.createTextNode(label));
+      };
+
+      const renderReport = (report) => {
+        const reserves = report.reserves;
+        const moneyPercent = numberFormat(4).format(reserves.managedMoneyMarket.percent);
+        const cashPercent = numberFormat(4).format(reserves.cash.percent);
+        const inventoryPercent = numberFormat(4).format(report.inventory.percentOfSupply);
+        const reserveTotal = currencyFormat(2).format(Number(reserves.total));
+        const moneyAmount = currencyFormat(2).format(Number(reserves.managedMoneyMarket.amount));
+        const cashAmount = currencyFormat(2).format(Number(reserves.cash.amount));
+        const inventoryAmount = numberFormat(2).format(Number(report.inventory.amount));
+        const refreshedAt = new Date(report.asOf).toISOString().slice(0, 16).replace("T", " ");
+
+        setText("snapshot-time", `Live data · ${refreshedAt} UTC`);
+        setText("coverage-value", `${numberFormat(8).format(reserves.coveragePercent)}%`);
+        setText("reserve-total", reserveTotal);
+        setText("supply-total", numberFormat(6).format(Number(report.supply.bridge)));
+        setText("reserve-surplus", currencyFormat(6).format(Number(reserves.surplus)));
+        setText("money-market-percent", `${moneyPercent}%`);
+        setText("money-market-amount", moneyAmount);
+        setText("cash-percent", `${cashPercent}%`);
+        setText("cash-amount", cashAmount);
+        setText("inventory-amount", inventoryAmount);
+        setText("inventory-percent", `${inventoryPercent}% of total supply`);
+        setText("money-market-row", `${moneyAmount} · ${moneyPercent}%`);
+        setText("cash-row", `${cashAmount} · ${cashPercent}%`);
+        setText("reserve-total-row", reserveTotal);
+        setText("liquidity-target", `${numberFormat(0, 2).format(report.liquidity.targetPercent)}%`);
+        setText("liquidity-copy", `Actual cash allocation is ${numberFormat(2).format(reserves.cash.percent)}%, closely tracking the configured target.`);
+        setText("allocation-minimum", String(report.liquidity.minimumRaw));
+        setText("tempo-block", `Tempo block ${numberFormat(0).format(report.network.blockNumber)}`);
+        setText("inventory-card-amount", `${inventoryAmount} pathUSD`);
+        setText("inventory-copy", `Available to Bridge's Orchestration system on Tempo. Inventory represents ${inventoryPercent}% of total pathUSD supply and is not added to reserve assets.`);
+
+        document.getElementById("composition-money").style.width = `${reserves.managedMoneyMarket.percent}%`;
+        document.getElementById("composition-cash").style.width = `${reserves.cash.percent}%`;
+        document.getElementById("composition-chart").setAttribute(
+          "aria-label",
+          `Reserve composition: ${moneyPercent}% managed money market and ${cashPercent}% cash`,
+        );
+
+        if (report.supply.matchesOnchain) {
+          setStatus("Live · reconciled", "positive");
+          setText("reconciliation-copy", "Bridge's supply response exactly matches the contract's onchain totalSupply() at the reported Tempo block.");
+        } else {
+          setStatus("Live · supply mismatch", "warning");
+          setText("reconciliation-copy", `Bridge reports ${report.supply.bridge} pathUSD while the contract reports ${report.supply.onchain} at the reported Tempo block.`);
+        }
+      };
+
+      const refreshReport = async () => {
+        setStatus("Refreshing data");
+        try {
+          const response = await fetch("/api/reserves", { headers: { Accept: "application/json" } });
+          if (!response.ok) throw new Error(`Reserve API returned ${response.status}`);
+          renderReport(await response.json());
+        } catch (error) {
+          console.error("Unable to refresh reserve data", error);
+          setStatus("Snapshot · refresh unavailable", "warning");
+        }
+      };
+
+      refreshReport();
+    </script>
   </body>
 </html>
