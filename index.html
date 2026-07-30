@@ -1,538 +1,1023 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-regen-color="neutral" data-regen-radius="medium">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="A point-in-time report on pathUSD supply, reserves, and liquidity using Bridge transparency APIs and Tempo RPC."
+      content="A live report on pathUSD supply, reserves, and liquidity using Bridge transparency APIs and Tempo RPC."
     />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0c0c" media="(prefers-color-scheme: dark)" />
     <title>pathUSD Reserves</title>
     <style>
       :root {
-        --ink: #171912;
-        --muted: #696d62;
-        --paper: #f5f4ed;
-        --card: #fffef8;
-        --line: #d9d8ce;
-        --green: #1c6a43;
-        --green-soft: #dcecdf;
-        --gold: #b6822f;
+        color-scheme: light dark;
+        --background: light-dark(#fafafa, #0c0c0c);
+        --surface: light-dark(#ffffff, #141414);
+        --surface-active: light-dark(oklch(93.89% 0 0), oklch(23.76% 0 0));
+        --secondary: light-dark(oklch(93.89% 0 0), oklch(23.76% 0 0));
+        --pane: light-dark(oklch(96.19% 0 0), oklch(23.76% 0 0));
+        --foreground: light-dark(oklch(20.44% 0 0), oklch(94.66% 0 0));
+        --foreground-secondary: light-dark(oklch(51.02% 0 0), oklch(70.8% 0 0));
+        --border: light-dark(oklch(93.89% 0 0), oklch(30.08% 0 0));
+        --border-pane: light-dark(oklch(91.3% 0 0), oklch(28.01% 0 0));
+        --accent: light-dark(oklch(20.44% 0 0), oklch(94.66% 0 0));
+        --on-accent: light-dark(#fff, #000);
+        --positive-subtle: light-dark(oklch(96.92% 0.0382 147.2), oklch(27.12% 0.0907 150.01));
+        --positive: light-dark(oklch(52% 0.15 147.84), oklch(81.51% 0.2258 148.1));
+        --info-subtle: light-dark(oklch(97.32% 0.0141 252.29), oklch(22.17% 0.0695 261.1));
+        --info: light-dark(oklch(53.18% 0.2399 256.99), oklch(71.7% 0.1648 250.79));
+        --warning-subtle: light-dark(oklch(97.48% 0.0331 85.79), oklch(22.46% 0.0538 76.04));
+        --warning: light-dark(oklch(48% 0.13 54.65), oklch(77.21% 0.1991 64.28));
+        --focus: light-dark(oklch(53.23% 0.2073 259.16), oklch(71.7% 0.1648 250.79));
+        --radius: 6px;
+        --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
       }
 
       * {
         box-sizing: border-box;
       }
 
+      html {
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
       body {
         margin: 0;
-        color: var(--ink);
-        background:
-          radial-gradient(circle at 100% 0%, #e1eadc 0, transparent 28rem),
-          var(--paper);
-        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: 16px;
-        line-height: 1.55;
+        min-width: 320px;
+        background: var(--background);
       }
 
-      main {
-        width: min(1120px, calc(100% - 40px));
-        margin: 0 auto;
-        padding: 64px 0 96px;
+      a {
+        color: inherit;
+        text-decoration-color: var(--foreground-secondary);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
       }
 
-      header {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 24px;
-        align-items: end;
-        padding-bottom: 32px;
-        border-bottom: 1px solid var(--line);
+      a:hover {
+        text-decoration-color: currentColor;
       }
 
-      .eyebrow,
-      .label {
-        margin: 0 0 10px;
-        color: var(--green);
-        font-size: 12px;
-        font-weight: 750;
-        letter-spacing: 0.13em;
-        text-transform: uppercase;
+      a:focus-visible {
+        border-radius: 2px;
+        outline: 2px solid var(--focus);
+        outline-offset: 3px;
       }
 
       h1,
       h2,
       h3,
       p {
-        margin-top: 0;
+        margin: 0;
       }
 
       h1 {
-        margin-bottom: 8px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(48px, 8vw, 88px);
-        font-weight: 500;
-        letter-spacing: -0.055em;
-        line-height: 0.98;
+        font-size: clamp(40px, 7vw, 64px);
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 1.1;
       }
 
       h2 {
-        margin-bottom: 22px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 32px;
+        font-size: clamp(24px, 3vw, 32px);
         font-weight: 500;
-        letter-spacing: -0.025em;
+        line-height: 1.25;
       }
 
       h3 {
-        margin-bottom: 8px;
         font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        line-height: 1.5;
       }
 
-      .subtitle,
-      .timestamp,
-      .note {
-        color: var(--muted);
+      main {
+        width: min(100% - 48px, 1120px);
+        margin-inline: auto;
+        padding-block: 48px 80px;
+      }
+
+      .header {
+        display: grid;
+        gap: 24px;
+        padding-block-end: 32px;
+        border-block-end: 1px solid var(--border);
+      }
+
+      .header-top,
+      .header-meta,
+      .tag,
+      .section-heading,
+      .legend-item,
+      .method {
+        display: flex;
+        align-items: center;
+      }
+
+      .header-top {
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .brand {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .header-meta {
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
       .subtitle {
-        max-width: 650px;
-        margin-bottom: 0;
-        font-size: 18px;
+        max-width: 680px;
+        color: var(--foreground-secondary);
+        font-size: 16px;
+        letter-spacing: 0.01em;
+        line-height: 1.6;
       }
 
-      .timestamp {
-        margin: 0;
-        text-align: right;
+      .tag {
+        min-height: 24px;
+        gap: 5px;
+        padding: 3px 8px;
+        color: var(--foreground-secondary);
+        background: var(--secondary);
+        border-radius: var(--radius);
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        line-height: 1.35;
         white-space: nowrap;
       }
 
+      .tag-positive {
+        color: var(--positive);
+        background: var(--positive-subtle);
+      }
+
+      .tag-warning {
+        color: var(--warning);
+        background: var(--warning-subtle);
+      }
+
+      .tag-dot {
+        width: 6px;
+        height: 6px;
+        flex: 0 0 6px;
+        background: currentColor;
+        border-radius: 50%;
+      }
+
       section {
-        padding-top: 56px;
-      }
-
-      .hero-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 14px;
+        gap: 20px;
+        padding-block-start: 56px;
       }
 
-      .metric,
-      .panel {
-        background: color-mix(in srgb, var(--card) 92%, transparent);
-        border: 1px solid var(--line);
-        border-radius: 14px;
+      .section-heading {
+        justify-content: space-between;
+        gap: 16px;
       }
 
-      .metric {
-        min-height: 174px;
-        padding: 22px;
+      .section-kicker {
+        color: var(--foreground-secondary);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
       }
 
-      .metric.primary {
-        color: #f6f5ed;
-        background: var(--green);
-        border-color: var(--green);
+      .summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.7fr);
+        gap: 12px;
       }
 
-      .metric.primary .label,
-      .metric.primary .detail {
-        color: #cfe4d5;
-      }
-
-      .value {
-        margin: 20px 0 8px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(29px, 3vw, 42px);
-        letter-spacing: -0.035em;
-        line-height: 1;
-      }
-
-      .detail {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
+      .box {
+        overflow: hidden;
+        color: var(--foreground);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
       }
 
       .coverage {
         display: grid;
-        grid-template-columns: 1.3fr 0.7fr;
+        min-height: 232px;
+        align-content: space-between;
+        gap: 32px;
+        padding: 24px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .coverage-label,
+      .coverage-detail {
+        color: color-mix(in oklch, var(--on-accent), transparent 30%);
+      }
+
+      .coverage-label,
+      .metric-label,
+      .row-label,
+      .callout-label {
+        font-size: 13px;
+        letter-spacing: 0.01em;
+        line-height: 1.4;
+      }
+
+      .coverage-value {
+        font-size: clamp(38px, 6vw, 64px);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+
+      .coverage-detail {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .summary-side {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .summary-row,
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 16px;
       }
 
-      .panel {
-        padding: 28px;
+      .summary-row {
+        min-height: 92px;
+        padding: 18px 20px;
       }
 
-      .bar {
+      .summary-row + .summary-row {
+        border-block-start: 1px solid var(--border);
+      }
+
+      .summary-row span:first-child,
+      .row-label {
+        color: var(--foreground-secondary);
+      }
+
+      .summary-value,
+      .row-value,
+      .metric-value {
+        font-feature-settings: "tnum" 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .summary-value {
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 1.4;
+        text-align: end;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        display: grid;
+        min-height: 136px;
+        align-content: space-between;
+        gap: 20px;
+        padding: 18px;
+      }
+
+      .metric-label {
+        color: var(--foreground-secondary);
+      }
+
+      .metric-value {
+        overflow-wrap: anywhere;
+        font-size: clamp(22px, 3vw, 32px);
+        font-weight: 500;
+        line-height: 1.25;
+      }
+
+      .metric-detail {
+        color: var(--foreground-secondary);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .two-column {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 0.55fr);
+        gap: 12px;
+      }
+
+      .panel-header {
+        display: grid;
+        gap: 4px;
+        padding: 20px;
+        border-block-end: 1px solid var(--border);
+      }
+
+      .panel-description,
+      .body-copy,
+      .note {
+        color: var(--foreground-secondary);
+        font-size: 14px;
+        letter-spacing: 0.01em;
+        line-height: 1.6;
+      }
+
+      .composition-chart {
         display: flex;
-        height: 48px;
-        margin: 24px 0 16px;
+        height: 12px;
+        margin: 20px;
         overflow: hidden;
-        background: #e8e7df;
-        border-radius: 7px;
+        background: var(--secondary);
+        border-radius: 9999px;
       }
 
-      .bar-money {
+      .composition-money {
         width: 90.1606%;
-        background: var(--green);
+        background: var(--accent);
       }
 
-      .bar-cash {
+      .composition-cash {
         width: 9.8394%;
-        background: var(--gold);
+        background: var(--foreground-secondary);
       }
 
       .legend {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
-        color: var(--muted);
-        font-size: 14px;
+        gap: 8px 16px;
+        padding: 0 20px 20px;
+        color: var(--foreground-secondary);
+        font-size: 12px;
       }
 
-      .dot {
-        display: inline-block;
-        width: 9px;
-        height: 9px;
-        margin-right: 7px;
+      .legend-item {
+        gap: 6px;
+      }
+
+      .legend-dot {
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
       }
 
-      .dot.green {
-        background: var(--green);
+      .legend-money {
+        background: var(--accent);
       }
 
-      .dot.gold {
-        background: var(--gold);
+      .legend-cash {
+        background: var(--foreground-secondary);
       }
 
-      .callout {
-        display: flex;
-        height: 100%;
-        flex-direction: column;
-        justify-content: space-between;
-        background: var(--green-soft);
-        border-color: #bdd5c3;
+      .rows {
+        background: var(--surface);
       }
 
-      .callout strong {
-        display: block;
-        margin-bottom: 8px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 54px;
-        font-weight: 500;
-        letter-spacing: -0.04em;
-        line-height: 1;
+      .row {
+        min-height: 56px;
+        padding: 12px 20px;
       }
 
-      table {
-        width: 100%;
-        overflow: hidden;
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 14px;
+      .row + .row {
+        border-block-start: 1px solid var(--border);
       }
 
-      th,
-      td {
-        padding: 18px 20px;
-        border-bottom: 1px solid var(--line);
-        text-align: left;
-      }
-
-      th {
-        color: var(--muted);
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      th:not(:first-child),
-      td:not(:first-child) {
-        text-align: right;
-      }
-
-      tr:last-child td {
-        border-bottom: 0;
-      }
-
-      .two-column {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-
-      .two-column p:last-child,
-      .panel p:last-child {
-        margin-bottom: 0;
-      }
-
-      ul {
-        margin: 0;
-        padding-left: 20px;
-      }
-
-      li + li {
-        margin-top: 9px;
-      }
-
-      code {
-        padding: 2px 5px;
-        background: #ecebe3;
-        border-radius: 4px;
-        font-family: "SFMono-Regular", Consolas, monospace;
-        font-size: 0.86em;
+      .row-value {
+        min-width: 0;
+        font-size: 14px;
+        line-height: 1.45;
+        text-align: end;
         overflow-wrap: anywhere;
       }
 
-      a {
-        color: var(--green);
-        text-decoration-thickness: 1px;
-        text-underline-offset: 3px;
+      .callout {
+        display: grid;
+        align-content: space-between;
+        gap: 32px;
+        min-height: 100%;
+        padding: 20px;
+        background: var(--pane);
       }
 
-      .api-list {
+      .callout-value {
+        padding-block: 8px;
+        font-size: 48px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+
+      .callout-note {
         display: grid;
         gap: 8px;
-        margin-top: 18px;
+        padding: 12px;
+        color: var(--warning);
+        background: var(--warning-subtle);
+        border-radius: var(--radius);
+        font-size: 13px;
+        letter-spacing: 0.01em;
+        line-height: 1.55;
       }
 
-      .api-list code {
-        display: block;
-        padding: 12px 14px;
-        background: #252820;
-        color: #e9eee4;
+      .content-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .content-card {
+        display: grid;
+        align-content: start;
+        gap: 16px;
+        padding: 20px;
+      }
+
+      .content-card ul {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding-inline-start: 20px;
+        color: var(--foreground-secondary);
+        font-size: 14px;
+        letter-spacing: 0.01em;
+        line-height: 1.6;
+      }
+
+      .info {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 10px;
+        padding: 14px;
+        color: var(--info);
+        background: var(--info-subtle);
+        border-radius: var(--radius);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .info-icon {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        place-items: center;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 600;
+      }
+
+      .methods {
+        display: grid;
+        gap: 1px;
+        overflow: hidden;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+
+      .method {
+        min-width: 0;
+        gap: 12px;
+        min-height: 52px;
+        padding: 10px 14px;
+        background: var(--surface);
+      }
+
+      .method-tag {
+        min-width: 46px;
+        flex: 0 0 46px;
+        padding: 3px 6px;
+        color: var(--foreground-secondary);
+        background: var(--secondary);
+        border-radius: 4px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.35;
+        text-align: center;
+      }
+
+      code {
+        font-family: var(--font-mono);
+      }
+
+      .method code,
+      .address {
+        min-width: 0;
+        font-size: 12px;
+        line-height: 1.55;
+        overflow-wrap: anywhere;
+      }
+
+      .address {
+        font-family: var(--font-mono);
       }
 
       footer {
         display: flex;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 24px;
-        margin-top: 64px;
-        padding-top: 24px;
-        color: var(--muted);
-        border-top: 1px solid var(--line);
-        font-size: 13px;
+        padding-block-start: 48px;
+        color: var(--foreground-secondary);
+        font-size: 12px;
+        line-height: 1.6;
       }
 
-      @media (max-width: 900px) {
-        .hero-grid {
-          grid-template-columns: repeat(2, 1fr);
+      @media (max-width: 860px) {
+        main {
+          width: min(100% - 32px, 1120px);
+          padding-block-start: 32px;
         }
 
-        .coverage,
+        .summary,
         .two-column {
           grid-template-columns: 1fr;
         }
+
+        .coverage {
+          min-height: 208px;
+        }
+
+        .summary-side {
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: auto;
+        }
+
+        .summary-row + .summary-row {
+          border-block-start: 0;
+          border-inline-start: 1px solid var(--border);
+        }
+
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
 
-      @media (max-width: 560px) {
+      @media (max-width: 600px) {
         main {
           width: min(100% - 24px, 1120px);
-          padding-top: 36px;
+          padding-block: 20px 48px;
         }
 
-        header {
+        .header {
+          gap: 20px;
+          padding-block-end: 24px;
+        }
+
+        .header-top {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .subtitle {
+          font-size: 15px;
+        }
+
+        section {
+          gap: 16px;
+          padding-block-start: 40px;
+        }
+
+        .section-heading {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .coverage {
+          min-height: 192px;
+          gap: 24px;
+          padding: 20px;
+        }
+
+        .summary-side {
           grid-template-columns: 1fr;
         }
 
-        .timestamp {
-          text-align: left;
+        .summary-row + .summary-row {
+          border-block-start: 1px solid var(--border);
+          border-inline-start: 0;
         }
 
-        .hero-grid {
-          grid-template-columns: 1fr;
+        .summary-row {
+          min-height: 64px;
+          padding: 14px 16px;
+        }
+
+        .summary-value {
+          font-size: 16px;
         }
 
         .metric {
-          min-height: 145px;
+          min-height: 124px;
+          padding: 16px;
         }
 
-        th,
-        td {
-          padding: 14px 12px;
+        .metric-value {
+          font-size: clamp(20px, 7vw, 26px);
+        }
+
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          align-items: flex-start;
+          min-height: 52px;
+          padding: 11px 16px;
+        }
+
+        .row-label {
+          flex: 0 0 38%;
+        }
+
+        .row-value {
+          flex: 1;
+        }
+
+        .composition-chart {
+          margin: 16px;
+        }
+
+        .legend {
+          padding: 0 16px 16px;
         }
 
         footer {
           flex-direction: column;
+          gap: 12px;
+          padding-block-start: 40px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+
+        .metric {
+          min-height: 108px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
         }
       }
     </style>
   </head>
   <body>
     <main>
-      <header>
-        <div>
-          <p class="eyebrow">Tempo · Reserve transparency report</p>
-          <h1>pathUSD Reserves</h1>
-          <p class="subtitle">
-            A point-in-time view of supply, backing assets, and Bridge liquidity,
-            reconciled against the Tempo network.
-          </p>
+      <header class="header">
+        <div class="header-top">
+          <span class="brand">Tempo · Reserve transparency</span>
+          <div class="header-meta">
+            <span class="tag"><span class="tag-dot"></span>Tempo</span>
+            <span class="tag" id="report-status" aria-live="polite"><span class="tag-dot"></span>Snapshot</span>
+          </div>
         </div>
-        <p class="timestamp">Snapshot<br /><strong>July 30, 2026 · 00:14 UTC</strong></p>
+        <h1>pathUSD Reserves</h1>
+        <p class="subtitle">
+          A live, cached view of pathUSD supply, backing assets, and Bridge liquidity,
+          reconciled against the Tempo network.
+        </p>
       </header>
 
-      <section aria-labelledby="overview-title">
-        <h2 id="overview-title">Reserve position</h2>
-        <div class="hero-grid">
-          <article class="metric primary">
-            <p class="label">Coverage</p>
-            <p class="value">100.00000017%</p>
-            <p class="detail">Reported reserves ÷ total supply</p>
+      <section aria-labelledby="position-title">
+        <div class="section-heading">
+          <h2 id="position-title">Reserve position</h2>
+          <p class="section-kicker" id="snapshot-time">Snapshot · 2026-07-30 00:14 UTC</p>
+        </div>
+
+        <div class="summary">
+          <article class="box coverage">
+            <div>
+              <p class="coverage-label">Reserve coverage</p>
+              <p class="coverage-value" id="coverage-value">100.00000017%</p>
+            </div>
+            <p class="coverage-detail">Reported reserve assets divided by total pathUSD supply.</p>
           </article>
-          <article class="metric">
-            <p class="label">Total supply</p>
-            <p class="value">23.985M</p>
-            <p class="detail">23,985,060.599981 pathUSD</p>
+
+          <div class="box summary-side">
+            <div class="summary-row">
+              <span>Reserve assets</span>
+              <strong class="summary-value" id="reserve-total">$23,985,060.64</strong>
+            </div>
+            <div class="summary-row">
+              <span>Total supply</span>
+              <strong class="summary-value" id="supply-total">23,985,060.599981</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <article class="box metric">
+            <p class="metric-label">Reserve surplus</p>
+            <div>
+              <p class="metric-value" id="reserve-surplus">$0.040019</p>
+              <p class="metric-detail">Assets above outstanding supply</p>
+            </div>
           </article>
-          <article class="metric">
-            <p class="label">Reserve assets</p>
-            <p class="value">$23.985M</p>
-            <p class="detail">$23,985,060.64 reported by Bridge</p>
+          <article class="box metric">
+            <p class="metric-label">Money market</p>
+            <div>
+              <p class="metric-value" id="money-market-percent">90.1606%</p>
+              <p class="metric-detail" id="money-market-amount">$21,625,081.54</p>
+            </div>
           </article>
-          <article class="metric">
-            <p class="label">Surplus</p>
-            <p class="value">$0.040019</p>
-            <p class="detail">Reserves above outstanding supply</p>
+          <article class="box metric">
+            <p class="metric-label">Cash</p>
+            <div>
+              <p class="metric-value" id="cash-percent">9.8394%</p>
+              <p class="metric-detail" id="cash-amount">$2,359,979.10</p>
+            </div>
+          </article>
+          <article class="box metric">
+            <p class="metric-label">Bridge inventory</p>
+            <div>
+              <p class="metric-value" id="inventory-amount">70,059.83</p>
+              <p class="metric-detail" id="inventory-percent">0.2921% of total supply</p>
+            </div>
           </article>
         </div>
       </section>
 
       <section aria-labelledby="composition-title">
-        <h2 id="composition-title">Reserve composition</h2>
-        <div class="coverage">
-          <article class="panel">
-            <p class="label">Backing assets</p>
-            <div class="bar" aria-label="90.1606% managed money market and 9.8394% cash">
-              <div class="bar-money" title="Managed money market: 90.1606%"></div>
-              <div class="bar-cash" title="Cash: 9.8394%"></div>
+        <div class="section-heading">
+          <h2 id="composition-title">Reserve composition</h2>
+          <p class="section-kicker">Bridge transparency API</p>
+        </div>
+
+        <div class="two-column">
+          <article class="box">
+            <div class="panel-header">
+              <h3>Backing assets</h3>
+              <p class="panel-description">Cash and managed money-market assets reported in USD.</p>
+            </div>
+            <div
+              class="composition-chart"
+              id="composition-chart"
+              role="img"
+              aria-label="Reserve composition: 90.1606% managed money market and 9.8394% cash"
+            >
+              <span class="composition-money" id="composition-money"></span>
+              <span class="composition-cash" id="composition-cash"></span>
             </div>
             <div class="legend">
-              <span><i class="dot green"></i>Managed money market · 90.1606%</span>
-              <span><i class="dot gold"></i>Cash · 9.8394%</span>
+              <span class="legend-item"><i class="legend-dot legend-money"></i>Managed money market</span>
+              <span class="legend-item"><i class="legend-dot legend-cash"></i>Cash</span>
             </div>
-            <table style="margin-top: 28px">
-              <thead>
-                <tr><th>Asset class</th><th>Amount</th><th>Share</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Managed money market</td><td>$21,625,081.54</td><td>90.1606%</td></tr>
-                <tr><td>Cash</td><td>$2,359,979.10</td><td>9.8394%</td></tr>
-                <tr><td><strong>Total</strong></td><td><strong>$23,985,060.64</strong></td><td><strong>100%</strong></td></tr>
-              </tbody>
-            </table>
+            <div class="rows">
+              <div class="row">
+                <span class="row-label">Managed money market</span>
+                <span class="row-value" id="money-market-row">$21,625,081.54 · 90.1606%</span>
+              </div>
+              <div class="row">
+                <span class="row-label">Cash</span>
+                <span class="row-value" id="cash-row">$2,359,979.10 · 9.8394%</span>
+              </div>
+              <div class="row">
+                <span class="row-label">Total reserves</span>
+                <strong class="row-value" id="reserve-total-row">$23,985,060.64</strong>
+              </div>
+            </div>
           </article>
-          <aside class="panel callout">
+
+          <aside class="box callout">
             <div>
-              <p class="label">Configured liquidity target</p>
-              <strong>10%</strong>
-              <p>Actual cash allocation is 9.84%, closely tracking the target.</p>
+              <p class="callout-label">Configured liquidity target</p>
+              <p class="callout-value" id="liquidity-target">10%</p>
+              <p class="body-copy" id="liquidity-copy">Actual cash allocation is 9.84%, closely tracking the configured target.</p>
             </div>
-            <p class="note">
-              The API returned an allocation minimum of <code>100000000</code> in raw units.
-              Bridge's documentation does not clearly identify the unit convention, so this
-              report does not assign it a dollar value.
-            </p>
+            <div class="callout-note">
+              <strong>Unit convention unclear</strong>
+              <span>
+                The API returned an allocation minimum of <code id="allocation-minimum">100000000</code> in raw units.
+                Bridge documentation does not define the unit, so no dollar value is assigned here.
+              </span>
+            </div>
           </aside>
         </div>
       </section>
 
-      <section aria-labelledby="inventory-title">
-        <h2 id="inventory-title">Liquidity and inventory</h2>
-        <div class="two-column">
-          <article class="panel">
-            <p class="label">Bridge orchestration inventory</p>
-            <p class="value">70,059.83</p>
-            <p>pathUSD available to Bridge's Orchestration system on Tempo.</p>
-            <p class="note">This represents 0.2921% of total supply.</p>
+      <section aria-labelledby="liquidity-title">
+        <div class="section-heading">
+          <h2 id="liquidity-title">Liquidity and network</h2>
+          <p class="section-kicker" id="tempo-block">Tempo block 32,346,775</p>
+        </div>
+
+        <div class="content-grid">
+          <article class="box content-card">
+            <h3>Bridge orchestration inventory</h3>
+            <p class="metric-value" id="inventory-card-amount">70,059.83 pathUSD</p>
+            <p class="body-copy" id="inventory-copy">
+              Available to Bridge's Orchestration system on Tempo. Inventory represents 0.2921%
+              of total pathUSD supply and is not added to reserve assets.
+            </p>
           </article>
-          <article class="panel">
-            <p class="label">Canonical asset</p>
-            <h3>pathUSD on Tempo</h3>
-            <p><code>0x20C0000000000000000000000000000000000000</code></p>
-            <p class="note">
+          <article class="box content-card">
+            <h3>Canonical asset</h3>
+            <p class="address">0x20C0000000000000000000000000000000000000</p>
+            <p class="body-copy" id="reconciliation-copy">
               Bridge's supply response exactly matched the contract's onchain
-              <code>totalSupply()</code> at Tempo block 32,346,775.
+              <code>totalSupply()</code> at the snapshot block.
             </p>
           </article>
         </div>
       </section>
 
-      <section aria-labelledby="structure-title">
-        <h2 id="structure-title">Reported structure and safeguards</h2>
-        <div class="two-column">
-          <article class="panel">
+      <section aria-labelledby="safeguards-title">
+        <div class="section-heading">
+          <h2 id="safeguards-title">Structure and safeguards</h2>
+          <p class="section-kicker">As reported by Bridge</p>
+        </div>
+
+        <div class="content-grid">
+          <article class="box content-card">
+            <h3>Issuance and custody</h3>
             <ul>
               <li>Bridge is the issuer and manages minting, burning, and reserves.</li>
-              <li>Bridge states that tokens are backed at least 1:1 by equivalent USD-value assets.</li>
-              <li>Reserves are described as held in segregated, bankruptcy-remote accounts for token holders.</li>
-              <li>Bridge names BlackRock and Fidelity among its reserve-management and custody partners.</li>
+              <li>Tokens are described as backed at least 1:1 by equivalent USD-value assets.</li>
+              <li>Reserves are described as segregated and bankruptcy remote for token holders.</li>
+              <li>Bridge names BlackRock and Fidelity among reserve-management and custody partners.</li>
             </ul>
           </article>
-          <article class="panel">
+          <article class="box content-card">
+            <h3>Liquidity profile</h3>
             <ul>
               <li>Cash supports rapid business-hours redemptions.</li>
-              <li>Money-market and treasury allocations generate earnings and may take up to one business day to redeem.</li>
-              <li>Bridge describes short-dated Treasuries, overnight Treasury repos, money-market funds, and cash as eligible portfolio assets.</li>
-              <li>The live pathUSD API reports only the higher-level asset classes shown in this report.</li>
+              <li>Money-market and treasury assets may take up to one business day to redeem.</li>
+              <li>Eligible assets can include short-dated Treasuries, repos, money-market funds, and cash.</li>
+              <li>The live pathUSD API reports only the higher-level asset classes shown above.</li>
             </ul>
           </article>
         </div>
       </section>
 
-      <section aria-labelledby="reporting-title">
-        <h2 id="reporting-title">Reporting and assurance</h2>
-        <div class="two-column">
-          <article class="panel">
-            <h3>What Bridge provides</h3>
-            <ul>
-              <li>Real-time APIs for supply, reserve composition, and inventory.</li>
-              <li>Monthly reports covering transaction activity, balances, and earnings.</li>
-              <li>Quarterly independent-accountant attestations, offered subject to an additional fee.</li>
-            </ul>
-          </article>
-          <article class="panel">
-            <h3>Important limitation</h3>
-            <p>
-              No public pathUSD-specific attestation or monthly report was found through
-              Bridge's documented API surface. The live figures establish an issuer-reported
-              reserve-to-supply match, but they are not themselves an independently audited snapshot.
-            </p>
-          </article>
+      <section aria-labelledby="assurance-title">
+        <div class="section-heading">
+          <h2 id="assurance-title">Reporting and assurance</h2>
+          <p class="section-kicker">Disclosure coverage</p>
+        </div>
+
+        <div class="box content-card">
+          <div class="content-grid">
+            <div>
+              <h3>What Bridge provides</h3>
+              <ul>
+                <li>Real-time APIs for supply, reserve composition, and inventory.</li>
+                <li>Monthly reports covering activity, balances, and earnings.</li>
+                <li>Quarterly independent-accountant attestations, subject to an additional fee.</li>
+              </ul>
+            </div>
+            <div class="info">
+              <i class="info-icon">i</i>
+              <span>
+                No public pathUSD-specific attestation or monthly report was found through Bridge's
+                documented API surface. These live figures are issuer-reported API data, not an
+                independently audited snapshot.
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="method-title">
-        <h2 id="method-title">Method and APIs</h2>
-        <article class="panel">
-          <p>
-            Read-only requests were made to Bridge's production API using the canonical
-            currency identifier <code>path_usd</code>. No mutation endpoints were called.
-            Onchain supply was independently checked using Tempo's public JSON-RPC endpoint.
-          </p>
-          <div class="api-list">
-            <code>GET /v0/transparency/path_usd/supply</code>
-            <code>GET /v0/transparency/path_usd/reserves</code>
-            <code>GET /v0/transparency/path_usd/inventory</code>
-            <code>GET /v0/issuance/reserves/liquidity_allocation</code>
-            <code>POST https://rpc.tempo.xyz · eth_blockNumber, eth_call totalSupply()</code>
-          </div>
-        </article>
+        <div class="section-heading">
+          <h2 id="method-title">Method and APIs</h2>
+          <p class="section-kicker">Read-only requests</p>
+        </div>
+        <p class="body-copy">
+          The page refreshes through a same-origin Vercel Function, keeping Bridge credentials
+          server-side. Its response is cached at the edge for five minutes and may be served stale
+          for up to one hour while it revalidates. No mutation endpoints are called. Supply is
+          independently checked with Tempo's public JSON-RPC endpoint.
+        </p>
+        <div class="methods">
+          <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/supply</code></div>
+          <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/reserves</code></div>
+          <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/inventory</code></div>
+          <div class="method"><span class="method-tag">GET</span><code>/v0/issuance/reserves/liquidity_allocation</code></div>
+          <div class="method"><span class="method-tag">POST</span><code>https://rpc.tempo.xyz · eth_blockNumber, eth_call totalSupply()</code></div>
+        </div>
       </section>
 
       <footer>
-        <span>Point-in-time informational report · Values may change after the snapshot.</span>
+        <span>Live informational report · API responses are cached for up to five minutes.</span>
         <span>
           Sources:
           <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency">Bridge transparency</a>
           ·
-          <a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management">reserve management</a>
+          <a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management">Reserve management</a>
         </span>
       </footer>
     </main>
+    <script>
+      const numberFormat = (minimumFractionDigits, maximumFractionDigits = minimumFractionDigits) =>
+        new Intl.NumberFormat("en-US", { minimumFractionDigits, maximumFractionDigits });
+      const currencyFormat = (minimumFractionDigits, maximumFractionDigits = minimumFractionDigits) =>
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits,
+          maximumFractionDigits,
+        });
+
+      const setText = (id, value) => {
+        document.getElementById(id).textContent = value;
+      };
+
+      const setStatus = (label, tone = "") => {
+        const status = document.getElementById("report-status");
+        status.className = `tag${tone ? ` tag-${tone}` : ""}`;
+        status.innerHTML = '<span class="tag-dot"></span>';
+        status.append(document.createTextNode(label));
+      };
+
+      const renderReport = (report) => {
+        const reserves = report.reserves;
+        const moneyPercent = numberFormat(4).format(reserves.managedMoneyMarket.percent);
+        const cashPercent = numberFormat(4).format(reserves.cash.percent);
+        const inventoryPercent = numberFormat(4).format(report.inventory.percentOfSupply);
+        const reserveTotal = currencyFormat(2).format(Number(reserves.total));
+        const moneyAmount = currencyFormat(2).format(Number(reserves.managedMoneyMarket.amount));
+        const cashAmount = currencyFormat(2).format(Number(reserves.cash.amount));
+        const inventoryAmount = numberFormat(2).format(Number(report.inventory.amount));
+        const refreshedAt = new Date(report.asOf).toISOString().slice(0, 16).replace("T", " ");
+
+        setText("snapshot-time", `Live data · ${refreshedAt} UTC`);
+        setText("coverage-value", `${numberFormat(8).format(reserves.coveragePercent)}%`);
+        setText("reserve-total", reserveTotal);
+        setText("supply-total", numberFormat(6).format(Number(report.supply.bridge)));
+        setText("reserve-surplus", currencyFormat(6).format(Number(reserves.surplus)));
+        setText("money-market-percent", `${moneyPercent}%`);
+        setText("money-market-amount", moneyAmount);
+        setText("cash-percent", `${cashPercent}%`);
+        setText("cash-amount", cashAmount);
+        setText("inventory-amount", inventoryAmount);
+        setText("inventory-percent", `${inventoryPercent}% of total supply`);
+        setText("money-market-row", `${moneyAmount} · ${moneyPercent}%`);
+        setText("cash-row", `${cashAmount} · ${cashPercent}%`);
+        setText("reserve-total-row", reserveTotal);
+        setText("liquidity-target", `${numberFormat(0, 2).format(report.liquidity.targetPercent)}%`);
+        setText("liquidity-copy", `Actual cash allocation is ${numberFormat(2).format(reserves.cash.percent)}%, closely tracking the configured target.`);
+        setText("allocation-minimum", String(report.liquidity.minimumRaw));
+        setText("tempo-block", `Tempo block ${numberFormat(0).format(report.network.blockNumber)}`);
+        setText("inventory-card-amount", `${inventoryAmount} pathUSD`);
+        setText("inventory-copy", `Available to Bridge's Orchestration system on Tempo. Inventory represents ${inventoryPercent}% of total pathUSD supply and is not added to reserve assets.`);
+
+        document.getElementById("composition-money").style.width = `${reserves.managedMoneyMarket.percent}%`;
+        document.getElementById("composition-cash").style.width = `${reserves.cash.percent}%`;
+        document.getElementById("composition-chart").setAttribute(
+          "aria-label",
+          `Reserve composition: ${moneyPercent}% managed money market and ${cashPercent}% cash`,
+        );
+
+        if (report.supply.matchesOnchain) {
+          setStatus("Live · reconciled", "positive");
+          setText("reconciliation-copy", "Bridge's supply response exactly matches the contract's onchain totalSupply() at the reported Tempo block.");
+        } else {
+          setStatus("Live · supply mismatch", "warning");
+          setText("reconciliation-copy", `Bridge reports ${report.supply.bridge} pathUSD while the contract reports ${report.supply.onchain} at the reported Tempo block.`);
+        }
+      };
+
+      const refreshReport = async () => {
+        setStatus("Refreshing data");
+        try {
+          const response = await fetch("/api/reserves", { headers: { Accept: "application/json" } });
+          if (!response.ok) throw new Error(`Reserve API returned ${response.status}`);
+          renderReport(await response.json());
+        } catch (error) {
+          console.error("Unable to refresh reserve data", error);
+          setStatus("Snapshot · refresh unavailable", "warning");
+        }
+      };
+
+      refreshReport();
+    </script>
   </body>
 </html>
