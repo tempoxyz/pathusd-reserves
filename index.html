@@ -116,7 +116,7 @@
       .tag,
       .section-heading,
       .legend-item,
-      .method {
+      .provenance {
         display: flex;
         align-items: center;
       }
@@ -170,6 +170,11 @@
         background: var(--warning-subtle);
       }
 
+      .tag-info {
+        color: var(--info);
+        background: var(--info-subtle);
+      }
+
       .tag-dot {
         width: 6px;
         height: 6px;
@@ -178,10 +183,45 @@
         border-radius: 50%;
       }
 
+      #report-status {
+        white-space: normal;
+      }
+
       section {
         display: grid;
         gap: 20px;
         padding-block-start: 56px;
+      }
+
+      .warning-banner {
+        display: grid;
+        gap: 10px;
+        margin-block-start: 24px;
+        padding: 18px 20px;
+        color: var(--warning);
+        background: var(--warning-subtle);
+        border: 1px solid color-mix(in oklch, var(--warning), transparent 70%);
+        border-radius: var(--radius);
+      }
+
+      .warning-banner strong {
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .warning-banner p {
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .taxonomy {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        color: var(--foreground-secondary);
+        font-size: 12px;
+        line-height: 1.5;
       }
 
       .section-heading {
@@ -614,41 +654,69 @@
         font-weight: 600;
       }
 
-      .methods {
-        display: grid;
-        gap: 1px;
-        overflow: hidden;
-        background: var(--border);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
+      .provenance {
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
-      .method {
-        min-width: 0;
-        gap: 12px;
-        min-height: 52px;
-        padding: 10px 14px;
-        background: var(--surface);
-      }
-
-      .method-tag {
-        min-width: 46px;
-        flex: 0 0 46px;
-        padding: 3px 6px;
+      .source-note {
         color: var(--foreground-secondary);
-        background: var(--secondary);
-        border-radius: 4px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        line-height: 1.35;
-        text-align: center;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .evidence-table-wrap {
+        overflow-x: auto;
+      }
+
+      .evidence-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .evidence-table th,
+      .evidence-table td {
+        padding: 14px 16px;
+        border-block-end: 1px solid var(--border);
+        text-align: start;
+        vertical-align: top;
+      }
+
+      .evidence-table th {
+        color: var(--foreground-secondary);
+        font-weight: 500;
+      }
+
+      .evidence-table tbody tr:last-child td {
+        border-block-end: 0;
+      }
+
+      .evidence-table td:first-child {
+        min-width: 150px;
+        font-weight: 500;
+      }
+
+      .evidence-table td:nth-child(2) {
+        min-width: 160px;
+      }
+
+      .evidence-table td:nth-child(3) {
+        min-width: 260px;
+        color: var(--foreground-secondary);
+      }
+
+      .methodology {
+        display: grid;
+        gap: 8px;
+        padding: 16px 20px;
       }
 
       code {
         font-family: var(--font-mono);
       }
 
-      .method code,
       .address {
         min-width: 0;
         font-size: 12px;
@@ -715,6 +783,10 @@
         .header-top {
           align-items: flex-start;
           flex-direction: column;
+        }
+
+        .header-meta {
+          width: 100%;
         }
 
         .subtitle {
@@ -854,10 +926,25 @@
         </div>
         <h1>pathUSD Reserves</h1>
         <p class="subtitle">
-          A live, cached view of pathUSD supply, backing assets, and Bridge liquidity,
-          reconciled against the Tempo network.
+          A live, cached view of issuer-reported pathUSD reserves and inventory, with onchain
+          supply reconciled to issuer-reported reserves at a reported Tempo block.
         </p>
       </header>
+
+      <aside class="warning-banner" aria-label="Independent assurance warning">
+        <strong>No current pathUSD-specific independent attestation is linked.</strong>
+        <p>
+          Live reserve values are reported by Bridge and are not independently assured in this report.
+          The evidence labels below distinguish source and assurance level.
+        </p>
+        <div class="taxonomy" aria-label="Evidence provenance taxonomy">
+          <span>Provenance:</span>
+          <span class="tag tag-positive">Onchain verified</span>
+          <span class="tag tag-info">Issuer-reported</span>
+          <span class="tag">Independently assured</span>
+          <span class="tag tag-warning">Missing</span>
+        </div>
+      </aside>
 
       <section aria-labelledby="position-title">
         <div class="section-heading">
@@ -868,10 +955,12 @@
         <div class="summary">
           <article class="box coverage">
             <div>
-              <p class="coverage-label">Reserve coverage</p>
+              <p class="coverage-label">Issuer-reported reserve coverage</p>
               <p class="coverage-value" id="coverage-value">100.00%</p>
             </div>
-            <p class="coverage-detail">Reported reserve assets divided by total pathUSD supply.</p>
+            <p class="coverage-detail">
+              Bridge-reported reserve assets divided by onchain-reconciled pathUSD supply.
+            </p>
           </article>
 
           <div class="box summary-side">
@@ -916,6 +1005,11 @@
             </div>
           </article>
         </div>
+        <p class="source-note">
+          <span class="tag tag-info">Issuer-reported</span>
+          Reserve balances, composition, inventory, and refresh time come from Bridge's live transparency data;
+          supply is checked against <code>totalSupply()</code> at the displayed Tempo block.
+        </p>
       </section>
 
       <section aria-labelledby="history-title">
@@ -983,15 +1077,17 @@
 
       <section aria-labelledby="composition-title">
         <div class="section-heading">
-          <h2 id="composition-title">Reserve composition</h2>
-          <p class="section-kicker">Bridge transparency API</p>
+          <h2 id="composition-title">Reserve quality and custody</h2>
+          <p class="section-kicker">Issuer-reported live composition</p>
         </div>
 
         <div class="two-column">
           <article class="box">
             <div class="panel-header">
-              <h3>Backing assets</h3>
-              <p class="panel-description">Cash and managed money-market assets reported in USD.</p>
+              <h3>Live pathUSD composition</h3>
+              <p class="panel-description">
+                Bridge's live pathUSD data reports only cash and managed money-market totals in USD.
+              </p>
             </div>
             <div
               class="composition-chart"
@@ -1029,19 +1125,45 @@
               <p class="body-copy" id="liquidity-copy">Actual cash allocation is 9.84%, closely tracking the configured target.</p>
             </div>
             <div class="callout-note">
-              <strong>Unit convention unclear</strong>
+              <strong>Holdings detail missing</strong>
               <span>
-                The API returned an allocation minimum of <code id="allocation-minimum">100000000</code> in raw units.
-                Bridge documentation does not define the unit, so no dollar value is assigned here.
+                No pathUSD-specific instrument or fund, issuer, custodian, market value by holding,
+                rating, maturity/WAM, concentration, or valuation source is linked.
               </span>
             </div>
           </aside>
+        </div>
+
+        <div class="content-grid">
+          <article class="box content-card">
+            <h3>Generic Open Issuance reserve options</h3>
+            <p class="body-copy">
+              Bridge's generic <a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management" target="_blank" rel="noreferrer">reserve-management documentation</a>
+              says custom stablecoin reserves can include USD, eligible stablecoins, and treasuries.
+              It describes USD as supporting US-business-hours liquidity, onchain stablecoins as potentially
+              providing 24/7 liquidity subject to applicable regulation, and treasuries as redeemable within one business day.
+            </p>
+          </article>
+          <article class="box content-card">
+            <h3>Partners and options are not pathUSD holdings</h3>
+            <p class="body-copy">
+              The same generic documentation names Lead Bank, BlackRock, Fidelity, Superstate/USTB,
+              and BUIDL as platform partners or options. This report has no pathUSD-specific evidence
+              that pathUSD uses each—or any—of those institutions or instruments.
+            </p>
+          </article>
+        </div>
+        <div class="provenance">
+          <span class="tag tag-info">Issuer-reported</span>
+          <span class="source-note">Live composition · refreshed at the snapshot time above</span>
+          <span class="tag tag-warning">Missing</span>
+          <span class="source-note">PathUSD-specific holdings and custody detail</span>
         </div>
       </section>
 
       <section aria-labelledby="liquidity-title">
         <div class="section-heading">
-          <h2 id="liquidity-title">Liquidity and network</h2>
+          <h2 id="liquidity-title">Inventory and network</h2>
           <p class="section-kicker" id="tempo-block">Tempo block 32,346,775</p>
         </div>
 
@@ -1051,7 +1173,8 @@
             <p class="metric-value" id="inventory-card-amount">70,059.83 pathUSD</p>
             <p class="body-copy" id="inventory-copy">
               Available to Bridge's Orchestration system on Tempo. Inventory represents 0.29%
-              of total pathUSD supply and is not added to reserve assets.
+              of total pathUSD supply and is not added to reserve assets. Inventory is not evidence
+              of executable market liquidity.
             </p>
           </article>
           <article class="box content-card">
@@ -1065,31 +1188,48 @@
         </div>
       </section>
 
-      <section aria-labelledby="safeguards-title">
+      <section aria-labelledby="legal-title">
         <div class="section-heading">
-          <h2 id="safeguards-title">Structure and safeguards</h2>
-          <p class="section-kicker">As reported by Bridge</p>
+          <h2 id="legal-title">Legal issuer and redemption</h2>
+          <p class="section-kicker">Generic Bridge Open Issuance documentation</p>
         </div>
 
         <div class="content-grid">
           <article class="box content-card">
-            <h3>Issuance and custody</h3>
-            <ul>
-              <li>Bridge is the issuer and manages minting, burning, and reserves.</li>
-              <li>Tokens are described as backed at least 1:1 by equivalent USD-value assets.</li>
-              <li>Reserves are described as segregated and bankruptcy remote for token holders.</li>
-              <li>Bridge names BlackRock and Fidelity among reserve-management and custody partners.</li>
-            </ul>
+            <h3>Documented platform structure</h3>
+            <p class="body-copy">
+              Bridge's <a href="https://apidocs.bridge.xyz/platform/issuance/minting-and-burning" target="_blank" rel="noreferrer">minting and burning documentation</a>
+              says Bridge is issuer and handles minting and burning; its
+              <a href="https://apidocs.bridge.xyz/platform/issuance/overview" target="_blank" rel="noreferrer">Open Issuance overview</a>
+              says Bridge manages reserves. Bridge's
+              <a href="https://apidocs.bridge.xyz/platform/issuance/faq" target="_blank" rel="noreferrer">end-user FAQ</a>
+              describes reserves as segregated and bankruptcy remote. These are Bridge's generic platform statements,
+              not pathUSD-specific controlling terms.
+            </p>
           </article>
           <article class="box content-card">
-            <h3>Liquidity profile</h3>
-            <ul>
-              <li>Cash supports rapid business-hours redemptions.</li>
-              <li>Money-market and treasury assets may take up to one business day to redeem.</li>
-              <li>Eligible assets can include short-dated Treasuries, repos, money-market funds, and cash.</li>
-              <li>The live pathUSD API reports only the higher-level asset classes shown above.</li>
-            </ul>
+            <h3>Documented mint and redemption flow</h3>
+            <p class="body-copy">
+              Bridge says a user deposit is detected, allocated to reserve accounts, and followed by minting
+              equivalent tokens. On redemption, Bridge says it detects incoming tokens, burns them, releases
+              equivalent fiat value, then sends fiat to a bank account or crypto to a specified address.
+              Bridge's <a href="https://apidocs.bridge.xyz/platform/issuance/designing-your-stablecoin" target="_blank" rel="noreferrer">design documentation</a>
+              describes Open Loop assets as public and permissionless; this does not establish pathUSD's legal redemption eligibility.
+            </p>
           </article>
+        </div>
+        <div class="info">
+          <i class="info-icon">i</i>
+          <span>
+            No pathUSD-specific controlling agreement is linked. The cited docs do not provide pathUSD-specific
+            direct-holder eligibility, fees or cutoffs, suspension rights, governing law, or insolvency claim mechanics.
+          </span>
+        </div>
+        <div class="provenance">
+          <span class="tag tag-info">Issuer-reported</span>
+          <span class="source-note">Generic Bridge Open Issuance structure and flow</span>
+          <span class="tag tag-warning">Missing</span>
+          <span class="source-note">PathUSD-specific controlling legal and redemption terms</span>
         </div>
       </section>
 
@@ -1104,51 +1244,140 @@
             <div>
               <h3>What Bridge provides</h3>
               <ul>
-                <li>Real-time APIs for supply, reserve composition, and inventory.</li>
-                <li>Monthly reports covering activity, balances, and earnings.</li>
-                <li>Quarterly independent-accountant attestations, subject to an additional fee.</li>
+                <li>Real-time APIs covering circulating supply, underlying reserves, and token inventory.</li>
+                <li>Monthly activity, balance, and earnings reports delivered by the 5th day of the month.</li>
+                <li>Quarterly independent-accountant attestations available subject to an additional fee.</li>
               </ul>
             </div>
             <div class="info">
               <i class="info-icon">i</i>
               <span>
-                No public pathUSD-specific attestation or monthly report was found through Bridge's
-                documented API surface. These live figures are issuer-reported API data, not an
-                independently audited snapshot.
+                No current public pathUSD-specific attestation or monthly report is linked here.
+                These live values are issuer-reported, not independently assured.
               </span>
             </div>
+          </div>
+          <p class="body-copy">
+            Bridge's <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency" target="_blank" rel="noreferrer">reporting documentation</a>
+            states the cadence and API scope above. Its
+            <a href="https://apidocs.bridge.xyz/platform/issuance/faq" target="_blank" rel="noreferrer">end-user FAQ</a>
+            says quarterly “audits and transparency reports” will cover balances, custodians, and third-party verification.
+            This report does not call the live pathUSD data audited.
+          </p>
+          <div class="provenance">
+            <span class="tag tag-info">Issuer-reported</span>
+            <span class="source-note">Bridge's generic reporting commitments and current live values</span>
+            <span class="tag tag-warning">Missing</span>
+            <span class="source-note">Current public pathUSD-specific independent assurance</span>
           </div>
         </div>
       </section>
 
-      <section aria-labelledby="method-title">
+      <section aria-labelledby="controls-title">
         <div class="section-heading">
-          <h2 id="method-title">Method and APIs</h2>
-          <p class="section-kicker">Read-only requests</p>
+          <h2 id="controls-title">Smart contract and controls</h2>
+          <p class="section-kicker">Evidence linked by this report</p>
         </div>
-        <p class="body-copy">
-          The page refreshes through a same-origin Vercel Function, keeping Bridge credentials
-          server-side. Its response is cached at the edge for five minutes and may be served stale
-          for up to one hour while it revalidates. No mutation endpoints are called. Supply is
-          independently checked with Tempo's public JSON-RPC endpoint.
-        </p>
-        <div class="methods">
-          <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/supply</code></div>
-          <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/reserves</code></div>
-          <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/inventory</code></div>
-          <div class="method"><span class="method-tag">GET</span><code>/v0/issuance/reserves/liquidity_allocation</code></div>
-          <div class="method"><span class="method-tag">POST</span><code>https://rpc.tempo.xyz · eth_blockNumber, eth_call totalSupply()</code></div>
-          <div class="method"><span class="method-tag">POST</span><code>Snowflake SQL API · daily pathUSD supply and peer-to-peer transfer volume</code></div>
+        <div class="content-grid">
+          <article class="box content-card">
+            <h3>Verified here</h3>
+            <p class="address">0x20C0000000000000000000000000000000000000</p>
+            <p class="body-copy">
+              This report checks the canonical pathUSD address and reconciles its <code>totalSupply()</code>
+              result to Bridge-reported supply at the displayed Tempo block.
+            </p>
+            <span class="tag tag-positive">Onchain verified</span>
+          </article>
+          <article class="box content-card">
+            <h3>Not evidenced or linked here</h3>
+            <p class="body-copy">
+              Verified source or bytecode; owner/admin addresses; mint, burn, pause, freeze, allowlist,
+              or upgrade roles; multisig thresholds; timelocks; key governance; security audit; and incident disclosure.
+              No contract behavior is inferred from these missing materials.
+            </p>
+            <span class="tag tag-warning">Missing</span>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="evidence-title">
+        <div class="section-heading">
+          <h2 id="evidence-title">Evidence status</h2>
+          <p class="section-kicker">Scope, source, and freshness</p>
+        </div>
+        <div class="box evidence-table-wrap">
+          <table class="evidence-table">
+            <thead>
+              <tr>
+                <th scope="col">Claim area</th>
+                <th scope="col">Status</th>
+                <th scope="col">Source / as-of / scope</th>
+                <th scope="col">Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Legal issuer</td>
+                <td><span class="tag tag-info">Issuer-reported</span></td>
+                <td>Bridge Open Issuance docs; generic platform statement, not pathUSD controlling terms</td>
+                <td><a href="https://apidocs.bridge.xyz/platform/issuance/faq" target="_blank" rel="noreferrer">Bridge FAQ</a></td>
+              </tr>
+              <tr>
+                <td>Redemption terms</td>
+                <td><span class="tag tag-warning">Missing</span></td>
+                <td>Generic operational flow exists; pathUSD-specific eligibility and legal terms are not linked</td>
+                <td><a href="https://apidocs.bridge.xyz/platform/issuance/minting-and-burning" target="_blank" rel="noreferrer">Generic flow</a></td>
+              </tr>
+              <tr>
+                <td>Reserve balance</td>
+                <td><span class="tag tag-info">Issuer-reported</span></td>
+                <td id="evidence-reserve-as-of">Bridge live transparency data · snapshot shown above</td>
+                <td><a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency" target="_blank" rel="noreferrer">API methodology</a></td>
+              </tr>
+              <tr>
+                <td>Reserve holdings detail</td>
+                <td><span class="tag tag-warning">Missing</span></td>
+                <td>No pathUSD-specific instrument, issuer, custodian, holding value, rating, maturity/WAM, concentration, or valuation source linked</td>
+                <td><a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management" target="_blank" rel="noreferrer">Generic options only</a></td>
+              </tr>
+              <tr>
+                <td>Independent assurance</td>
+                <td><span class="tag tag-warning">Missing</span></td>
+                <td>No current public pathUSD-specific attestation or monthly report linked</td>
+                <td><a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency" target="_blank" rel="noreferrer">Generic reporting policy</a></td>
+              </tr>
+              <tr>
+                <td>Onchain supply</td>
+                <td><span class="tag tag-positive">Onchain verified</span></td>
+                <td id="evidence-supply-as-of">Canonical address and totalSupply() reconciliation · reported Tempo block shown above</td>
+                <td><a href="#liquidity-title">Network evidence</a></td>
+              </tr>
+              <tr>
+                <td>Contract controls</td>
+                <td><span class="tag tag-warning">Missing</span></td>
+                <td>Source, administrators, privileged roles, governance, audit, and incident disclosure not linked</td>
+                <td><a href="#controls-title">Scope of review</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box methodology">
+          <h3>Methodology and freshness</h3>
+          <p class="body-copy">
+            Reserve data is read through a credential-protecting same-origin function, cached for five minutes,
+            and may be served stale for up to one hour during revalidation. Daily history is warehouse-derived and
+            cached hourly. Supply is checked read-only against Tempo at one reported block; all other live values remain issuer-reported.
+          </p>
         </div>
       </section>
 
       <footer>
-        <span>Live informational report · reserves cache for five minutes; daily history caches hourly.</span>
+        <span>Informational evidence report · no approval or recommendation is expressed.</span>
         <span>
           Sources:
-          <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency">Bridge transparency</a>
+          <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency" target="_blank" rel="noreferrer">Bridge transparency</a>
           ·
-          <a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management">Reserve management</a>
+          <a href="https://apidocs.bridge.xyz/platform/issuance/reserve-management" target="_blank" rel="noreferrer">Reserve management</a>
         </span>
       </footer>
     </main>
@@ -1325,10 +1554,11 @@
         setText("reserve-total-row", reserveTotal);
         setText("liquidity-target", `${numberFormat(2).format(report.liquidity.targetPercent)}%`);
         setText("liquidity-copy", `Actual cash allocation is ${numberFormat(2).format(reserves.cash.percent)}%, closely tracking the configured target.`);
-        setText("allocation-minimum", String(report.liquidity.minimumRaw));
         setText("tempo-block", `Tempo block ${numberFormat(0).format(report.network.blockNumber)}`);
+        setText("evidence-reserve-as-of", `Bridge live transparency data · ${refreshedAt} UTC`);
+        setText("evidence-supply-as-of", `Canonical address and totalSupply() reconciliation · Tempo block ${numberFormat(0).format(report.network.blockNumber)}`);
         setText("inventory-card-amount", `${inventoryAmount} pathUSD`);
-        setText("inventory-copy", `Available to Bridge's Orchestration system on Tempo. Inventory represents ${inventoryPercent}% of total pathUSD supply and is not added to reserve assets.`);
+        setText("inventory-copy", `Available to Bridge's Orchestration system on Tempo. Inventory represents ${inventoryPercent}% of total pathUSD supply and is not added to reserve assets. Inventory is not evidence of executable market liquidity.`);
 
         document.getElementById("composition-money").style.width = `${reserves.managedMoneyMarket.percent}%`;
         document.getElementById("composition-cash").style.width = `${reserves.cash.percent}%`;
@@ -1338,10 +1568,10 @@
         );
 
         if (report.supply.matchesOnchain) {
-          setStatus("Live · reconciled", "positive");
-          setText("reconciliation-copy", "Bridge's supply response exactly matches the contract's onchain totalSupply() at the reported Tempo block.");
+          setStatus("Onchain supply reconciled to issuer-reported reserves", "positive");
+          setText("reconciliation-copy", "Bridge-reported supply exactly matches the contract's onchain totalSupply() at the reported Tempo block; reserve balances remain issuer-reported.");
         } else {
-          setStatus("Live · supply mismatch", "warning");
+          setStatus("Onchain supply does not match issuer-reported supply", "warning");
           setText("reconciliation-copy", `Bridge reports ${report.supply.bridge} pathUSD while the contract reports ${report.supply.onchain} at the reported Tempo block.`);
         }
       };
