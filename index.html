@@ -352,12 +352,12 @@
       }
 
       .composition-money {
-        width: 90.1606%;
+        width: 90.16%;
         background: var(--accent);
       }
 
       .composition-cash {
-        width: 9.8394%;
+        width: 9.84%;
         background: var(--foreground-secondary);
       }
 
@@ -716,7 +716,7 @@
           <article class="box coverage">
             <div>
               <p class="coverage-label">Reserve coverage</p>
-              <p class="coverage-value" id="coverage-value">100.00000017%</p>
+              <p class="coverage-value" id="coverage-value">100.00%</p>
             </div>
             <p class="coverage-detail">Reported reserve assets divided by total pathUSD supply.</p>
           </article>
@@ -737,21 +737,21 @@
           <article class="box metric">
             <p class="metric-label">Reserve surplus</p>
             <div>
-              <p class="metric-value" id="reserve-surplus">$0.040019</p>
+              <p class="metric-value" id="reserve-surplus">$0.04</p>
               <p class="metric-detail">Assets above outstanding supply</p>
             </div>
           </article>
           <article class="box metric">
             <p class="metric-label">Money market</p>
             <div>
-              <p class="metric-value" id="money-market-percent">90.1606%</p>
+              <p class="metric-value" id="money-market-percent">90.16%</p>
               <p class="metric-detail" id="money-market-amount">$21,625,081.54</p>
             </div>
           </article>
           <article class="box metric">
             <p class="metric-label">Cash</p>
             <div>
-              <p class="metric-value" id="cash-percent">9.8394%</p>
+              <p class="metric-value" id="cash-percent">9.84%</p>
               <p class="metric-detail" id="cash-amount">$2,359,979.10</p>
             </div>
           </article>
@@ -759,7 +759,7 @@
             <p class="metric-label">Bridge inventory</p>
             <div>
               <p class="metric-value" id="inventory-amount">70,059.83</p>
-              <p class="metric-detail" id="inventory-percent">0.2921% of total supply</p>
+              <p class="metric-detail" id="inventory-percent">0.29% of total supply</p>
             </div>
           </article>
         </div>
@@ -781,7 +781,7 @@
               class="composition-chart"
               id="composition-chart"
               role="img"
-              aria-label="Reserve composition: 90.1606% managed money market and 9.8394% cash"
+              aria-label="Reserve composition: 90.16% managed money market and 9.84% cash"
             >
               <span class="composition-money" id="composition-money"></span>
               <span class="composition-cash" id="composition-cash"></span>
@@ -793,11 +793,11 @@
             <div class="rows">
               <div class="row">
                 <span class="row-label">Managed money market</span>
-                <span class="row-value" id="money-market-row">$21,625,081.54 · 90.1606%</span>
+                <span class="row-value" id="money-market-row">$21,625,081.54 · 90.16%</span>
               </div>
               <div class="row">
                 <span class="row-label">Cash</span>
-                <span class="row-value" id="cash-row">$2,359,979.10 · 9.8394%</span>
+                <span class="row-value" id="cash-row">$2,359,979.10 · 9.84%</span>
               </div>
               <div class="row">
                 <span class="row-label">Total reserves</span>
@@ -809,7 +809,7 @@
           <aside class="box callout">
             <div>
               <p class="callout-label">Configured liquidity target</p>
-              <p class="callout-value" id="liquidity-target">10%</p>
+              <p class="callout-value" id="liquidity-target">10.00%</p>
               <p class="body-copy" id="liquidity-copy">Actual cash allocation is 9.84%, closely tracking the configured target.</p>
             </div>
             <div class="callout-note">
@@ -834,7 +834,7 @@
             <h3>Bridge orchestration inventory</h3>
             <p class="metric-value" id="inventory-card-amount">70,059.83 pathUSD</p>
             <p class="body-copy" id="inventory-copy">
-              Available to Bridge's Orchestration system on Tempo. Inventory represents 0.2921%
+              Available to Bridge's Orchestration system on Tempo. Inventory represents 0.29%
               of total pathUSD supply and is not added to reserve assets.
             </p>
           </article>
@@ -959,9 +959,9 @@
 
       const renderReport = (report) => {
         const reserves = report.reserves;
-        const moneyPercent = numberFormat(4).format(reserves.managedMoneyMarket.percent);
-        const cashPercent = numberFormat(4).format(reserves.cash.percent);
-        const inventoryPercent = numberFormat(4).format(report.inventory.percentOfSupply);
+        const moneyPercent = numberFormat(2).format(reserves.managedMoneyMarket.percent);
+        const cashPercent = numberFormat(2).format(reserves.cash.percent);
+        const inventoryPercent = numberFormat(2).format(report.inventory.percentOfSupply);
         const reserveTotal = currencyFormat(2).format(Number(reserves.total));
         const moneyAmount = currencyFormat(2).format(Number(reserves.managedMoneyMarket.amount));
         const cashAmount = currencyFormat(2).format(Number(reserves.cash.amount));
@@ -969,10 +969,10 @@
         const refreshedAt = new Date(report.asOf).toISOString().slice(0, 16).replace("T", " ");
 
         setText("snapshot-time", `Live data · ${refreshedAt} UTC`);
-        setText("coverage-value", `${numberFormat(8).format(reserves.coveragePercent)}%`);
+        setText("coverage-value", `${numberFormat(2).format(reserves.coveragePercent)}%`);
         setText("reserve-total", reserveTotal);
         setText("supply-total", numberFormat(6).format(Number(report.supply.bridge)));
-        setText("reserve-surplus", currencyFormat(6).format(Number(reserves.surplus)));
+        setText("reserve-surplus", currencyFormat(2).format(Number(reserves.surplus)));
         setText("money-market-percent", `${moneyPercent}%`);
         setText("money-market-amount", moneyAmount);
         setText("cash-percent", `${cashPercent}%`);
@@ -982,7 +982,7 @@
         setText("money-market-row", `${moneyAmount} · ${moneyPercent}%`);
         setText("cash-row", `${cashAmount} · ${cashPercent}%`);
         setText("reserve-total-row", reserveTotal);
-        setText("liquidity-target", `${numberFormat(0, 2).format(report.liquidity.targetPercent)}%`);
+        setText("liquidity-target", `${numberFormat(2).format(report.liquidity.targetPercent)}%`);
         setText("liquidity-copy", `Actual cash allocation is ${numberFormat(2).format(reserves.cash.percent)}%, closely tracking the configured target.`);
         setText("allocation-minimum", String(report.liquidity.minimumRaw));
         setText("tempo-block", `Tempo block ${numberFormat(0).format(report.network.blockNumber)}`);
