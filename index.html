@@ -295,6 +295,135 @@
         gap: 12px;
       }
 
+      .trend-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .trend-card {
+        position: relative;
+      }
+
+      .trend-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        padding: 20px 20px 4px;
+      }
+
+      .trend-heading,
+      .trend-summary {
+        display: grid;
+        gap: 4px;
+      }
+
+      .trend-summary {
+        align-content: start;
+        text-align: end;
+      }
+
+      .trend-value {
+        font-size: clamp(24px, 3vw, 32px);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+      }
+
+      .trend-as-of,
+      .trend-source {
+        color: var(--foreground-secondary);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      .trend-description {
+        color: var(--foreground-secondary);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .chart-shell {
+        position: relative;
+        padding: 8px 12px 0;
+      }
+
+      .trend-chart {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 240px;
+        color: var(--foreground);
+      }
+
+      .chart-grid {
+        stroke: var(--border-pane);
+        stroke-width: 1;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .chart-axis-label {
+        fill: var(--foreground-secondary);
+        font-family: var(--font-body);
+        font-size: 11px;
+      }
+
+      .chart-area {
+        fill: var(--secondary);
+      }
+
+      .chart-line {
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2.5;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .chart-marker-line {
+        stroke: var(--foreground-secondary);
+        stroke-dasharray: 3 3;
+        stroke-width: 1;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .chart-marker {
+        fill: var(--surface);
+        stroke: currentColor;
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .chart-tooltip {
+        position: absolute;
+        z-index: 1;
+        max-width: 180px;
+        padding: 7px 9px;
+        color: var(--foreground);
+        background: var(--surface);
+        border: 1px solid var(--border-pane);
+        border-radius: var(--radius);
+        box-shadow: 0 8px 24px color-mix(in oklch, var(--foreground), transparent 88%);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.45;
+        pointer-events: none;
+        transform: translate(-50%, calc(-100% - 10px));
+        white-space: nowrap;
+      }
+
+      .chart-tooltip[hidden] {
+        display: none;
+      }
+
+      .trend-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 4px 20px 16px;
+      }
+
       .metric {
         display: grid;
         min-height: 136px;
@@ -640,6 +769,30 @@
           grid-template-columns: 1fr;
         }
 
+        .trend-header {
+          grid-template-columns: 1fr;
+          padding: 16px 16px 4px;
+        }
+
+        .trend-summary {
+          text-align: start;
+        }
+
+        .chart-shell {
+          padding-inline: 4px;
+        }
+
+        .trend-chart {
+          min-height: 210px;
+        }
+
+        .trend-footer {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 4px;
+          padding-inline: 16px;
+        }
+
         .row {
           align-items: flex-start;
           min-height: 52px;
@@ -760,6 +913,69 @@
             <div>
               <p class="metric-value" id="inventory-amount">70,059.83</p>
               <p class="metric-detail" id="inventory-percent">0.29% of total supply</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="history-title">
+        <div class="section-heading">
+          <h2 id="history-title">Supply and activity</h2>
+          <p class="section-kicker" id="history-status">Loading daily history…</p>
+        </div>
+
+        <div class="trend-grid">
+          <article class="box trend-card">
+            <div class="trend-header">
+              <div class="trend-heading">
+                <h3>Supply on Tempo</h3>
+                <p class="trend-description">Outstanding native pathUSD supply · cumulative mints minus burns</p>
+              </div>
+              <div class="trend-summary">
+                <strong class="trend-value" id="supply-chart-value">—</strong>
+                <span class="trend-as-of" id="supply-chart-date">Loading…</span>
+              </div>
+            </div>
+            <div class="chart-shell">
+              <svg
+                class="trend-chart"
+                id="supply-chart"
+                viewBox="0 0 800 280"
+                role="img"
+                aria-label="Historical pathUSD supply on Tempo"
+              ></svg>
+              <div class="chart-tooltip" id="supply-chart-tooltip" hidden></div>
+            </div>
+            <div class="trend-footer">
+              <span class="trend-source">Daily · live Bridge supply appended</span>
+              <span class="trend-source">Tempo Snowflake warehouse · TIP-20 events</span>
+            </div>
+          </article>
+
+          <article class="box trend-card">
+            <div class="trend-header">
+              <div class="trend-heading">
+                <h3>All-time transfer volume</h3>
+                <p class="trend-description">Cumulative peer-to-peer transfer value · excludes mint, burn, and fee events</p>
+              </div>
+              <div class="trend-summary">
+                <strong class="trend-value" id="volume-chart-value">—</strong>
+                <span class="trend-as-of" id="volume-chart-date">Loading…</span>
+              </div>
+            </div>
+            <div class="chart-shell">
+              <svg
+                class="trend-chart"
+                id="volume-chart"
+                viewBox="0 0 800 280"
+                role="img"
+                aria-label="Historical cumulative peer-to-peer pathUSD transfer volume"
+              ></svg>
+              <div class="chart-tooltip" id="volume-chart-tooltip" hidden></div>
+            </div>
+            <div class="trend-footer">
+              <span class="trend-source">Daily cumulative USD value</span>
+              <span class="trend-source">Tempo Snowflake warehouse · TIP-20 events</span>
             </div>
           </article>
         </div>
@@ -922,11 +1138,12 @@
           <div class="method"><span class="method-tag">GET</span><code>/v0/transparency/path_usd/inventory</code></div>
           <div class="method"><span class="method-tag">GET</span><code>/v0/issuance/reserves/liquidity_allocation</code></div>
           <div class="method"><span class="method-tag">POST</span><code>https://rpc.tempo.xyz · eth_blockNumber, eth_call totalSupply()</code></div>
+          <div class="method"><span class="method-tag">POST</span><code>Snowflake SQL API · daily pathUSD supply and peer-to-peer transfer volume</code></div>
         </div>
       </section>
 
       <footer>
-        <span>Live informational report · API responses are cached for up to five minutes.</span>
+        <span>Live informational report · reserves cache for five minutes; daily history caches hourly.</span>
         <span>
           Sources:
           <a href="https://apidocs.bridge.xyz/platform/issuance/reporting-and-transparency">Bridge transparency</a>
@@ -955,6 +1172,130 @@
         status.className = `tag${tone ? ` tag-${tone}` : ""}`;
         status.innerHTML = '<span class="tag-dot"></span>';
         status.append(document.createTextNode(label));
+      };
+
+      const compactValue = (value, { currency = false, suffix = "" } = {}) => {
+        const absolute = Math.abs(value);
+        const units = [
+          { threshold: 1_000_000_000, divisor: 1_000_000_000, label: "B" },
+          { threshold: 1_000_000, divisor: 1_000_000, label: "M" },
+          { threshold: 1_000, divisor: 1_000, label: "K" },
+        ];
+        const unit = units.find(({ threshold }) => absolute >= threshold);
+        const formatted = unit
+          ? `${numberFormat(2).format(value / unit.divisor)}${unit.label}`
+          : numberFormat(2).format(value);
+        return `${currency ? "$" : ""}${formatted}${suffix}`;
+      };
+
+      const formatChartDate = (date) =>
+        new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          timeZone: "UTC",
+        }).format(new Date(`${date}T00:00:00Z`));
+
+      const svgElement = (name, attributes = {}, text = "") => {
+        const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+        for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+        if (text) element.textContent = text;
+        return element;
+      };
+
+      const niceStep = (maximum) => {
+        const roughStep = maximum / 5;
+        const magnitude = 10 ** Math.floor(Math.log10(roughStep || 1));
+        const normalized = roughStep / magnitude;
+        const multiplier = [1, 2, 5, 10].find((candidate) => normalized <= candidate) ?? 10;
+        return multiplier * magnitude;
+      };
+
+      const renderLineChart = (svg, tooltip, points, { axisFormatter, valueFormatter }) => {
+        svg.replaceChildren();
+        if (!points.length) return;
+
+        const width = 800;
+        const height = 280;
+        const padding = { top: 16, right: 16, bottom: 38, left: 64 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        const maximum = Math.max(...points.map(({ value }) => value));
+        const step = niceStep(maximum);
+        const yMaximum = Math.ceil(maximum / step) * step;
+        const xFor = (index) => padding.left + (index / Math.max(points.length - 1, 1)) * plotWidth;
+        const yFor = (value) => padding.top + plotHeight - (value / yMaximum) * plotHeight;
+
+        for (let tick = 0; tick <= yMaximum; tick += step) {
+          const y = yFor(tick);
+          svg.append(svgElement("line", { class: "chart-grid", x1: padding.left, x2: width - padding.right, y1: y, y2: y }));
+          svg.append(svgElement("text", { class: "chart-axis-label", x: padding.left - 10, y: y + 4, "text-anchor": "end" }, axisFormatter(tick)));
+        }
+
+        const tickCount = Math.min(svg.clientWidth < 520 ? 4 : 6, points.length);
+        const tickIndexes = new Set(
+          Array.from({ length: tickCount }, (_, index) =>
+            Math.round((index / Math.max(tickCount - 1, 1)) * (points.length - 1)),
+          ),
+        );
+        const monthFormatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+        for (const index of tickIndexes) {
+          const point = points[index];
+          svg.append(
+            svgElement(
+              "text",
+              {
+                class: "chart-axis-label",
+                x: xFor(index),
+                y: height - 10,
+                "text-anchor": index === 0 ? "start" : index === points.length - 1 ? "end" : "middle",
+              },
+              monthFormatter.format(new Date(`${point.date}T00:00:00Z`)),
+            ),
+          );
+        }
+
+        const linePath = points
+          .map(({ value }, index) => `${index ? "L" : "M"}${xFor(index).toFixed(2)},${yFor(value).toFixed(2)}`)
+          .join(" ");
+        const areaPath = `${linePath} L${xFor(points.length - 1)},${padding.top + plotHeight} L${padding.left},${padding.top + plotHeight} Z`;
+        svg.append(svgElement("path", { class: "chart-area", d: areaPath }));
+        svg.append(svgElement("path", { class: "chart-line", d: linePath }));
+
+        const markerLine = svgElement("line", { class: "chart-marker-line", y1: padding.top, y2: padding.top + plotHeight, visibility: "hidden" });
+        const marker = svgElement("circle", { class: "chart-marker", r: 4, visibility: "hidden" });
+        const hitArea = svgElement("rect", {
+          x: padding.left,
+          y: padding.top,
+          width: plotWidth,
+          height: plotHeight,
+          fill: "transparent",
+        });
+        svg.append(markerLine, marker, hitArea);
+
+        svg.onpointermove = (event) => {
+          const bounds = svg.getBoundingClientRect();
+          const svgX = ((event.clientX - bounds.left) / bounds.width) * width;
+          const index = Math.max(0, Math.min(points.length - 1, Math.round(((svgX - padding.left) / plotWidth) * (points.length - 1))));
+          const point = points[index];
+          const x = xFor(index);
+          const y = yFor(point.value);
+          markerLine.setAttribute("x1", x);
+          markerLine.setAttribute("x2", x);
+          markerLine.setAttribute("visibility", "visible");
+          marker.setAttribute("cx", x);
+          marker.setAttribute("cy", y);
+          marker.setAttribute("visibility", "visible");
+          tooltip.textContent = `${formatChartDate(point.date)} · ${valueFormatter(point.value)}`;
+          tooltip.style.left = `${(x / width) * 100}%`;
+          tooltip.style.top = `${(y / height) * 100}%`;
+          tooltip.hidden = false;
+        };
+        svg.onpointerleave = () => {
+          markerLine.setAttribute("visibility", "hidden");
+          marker.setAttribute("visibility", "hidden");
+          tooltip.hidden = true;
+        };
       };
 
       const renderReport = (report) => {
@@ -1005,19 +1346,76 @@
         }
       };
 
-      const refreshReport = async () => {
+      const renderHistory = (history, report) => {
+        const supply = [...history.supply];
+        if (report) {
+          const livePoint = { date: report.asOf.slice(0, 10), value: Number(report.supply.bridge) };
+          if (supply.at(-1)?.date === livePoint.date) supply[supply.length - 1] = livePoint;
+          else supply.push(livePoint);
+        }
+
+        const supplyAsOf = supply.at(-1).date;
+        const volumeAsOf = history.transferVolume.at(-1).date;
+        setText("history-status", `Daily history · through ${formatChartDate(volumeAsOf)}`);
+        setText("supply-chart-value", compactValue(supply.at(-1).value, { suffix: " pathUSD" }));
+        setText("supply-chart-date", `As of ${formatChartDate(supplyAsOf)}`);
+        setText("volume-chart-value", compactValue(history.transferVolume.at(-1).value, { currency: true }));
+        setText("volume-chart-date", `As of ${formatChartDate(volumeAsOf)}`);
+
+        renderLineChart(
+          document.getElementById("supply-chart"),
+          document.getElementById("supply-chart-tooltip"),
+          supply,
+          {
+            axisFormatter: (value) => compactValue(value, { suffix: "" }).replace(".00", ""),
+            valueFormatter: (value) => `${numberFormat(2).format(value)} pathUSD`,
+          },
+        );
+        renderLineChart(
+          document.getElementById("volume-chart"),
+          document.getElementById("volume-chart-tooltip"),
+          history.transferVolume,
+          {
+            axisFormatter: (value) => compactValue(value, { currency: true }).replace(".00", ""),
+            valueFormatter: (value) => currencyFormat(2).format(value),
+          },
+        );
+      };
+
+      const showHistoryError = () => {
+        setText("history-status", "Daily history unavailable");
+        setText("supply-chart-date", "Refresh unavailable");
+        setText("volume-chart-date", "Refresh unavailable");
+      };
+
+      const fetchJson = async (url, label) => {
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        if (!response.ok) throw new Error(`${label} API returned ${response.status}`);
+        return response.json();
+      };
+
+      const refreshDashboard = async () => {
         setStatus("Refreshing data");
-        try {
-          const response = await fetch("/api/reserves", { headers: { Accept: "application/json" } });
-          if (!response.ok) throw new Error(`Reserve API returned ${response.status}`);
-          renderReport(await response.json());
-        } catch (error) {
-          console.error("Unable to refresh reserve data", error);
+        const [reportResult, historyResult] = await Promise.allSettled([
+          fetchJson("/api/reserves", "Reserve"),
+          fetchJson("/api/history", "History"),
+        ]);
+
+        if (reportResult.status === "fulfilled") renderReport(reportResult.value);
+        else {
+          console.error("Unable to refresh reserve data", reportResult.reason);
           setStatus("Snapshot · refresh unavailable", "warning");
+        }
+
+        if (historyResult.status === "fulfilled") {
+          renderHistory(historyResult.value, reportResult.status === "fulfilled" ? reportResult.value : null);
+        } else {
+          console.error("Unable to refresh historical data", historyResult.reason);
+          showHistoryError();
         }
       };
 
-      refreshReport();
+      refreshDashboard();
     </script>
   </body>
 </html>
