@@ -1167,6 +1167,26 @@
         document.getElementById(id).textContent = value;
       };
 
+      // Placeholder shown wherever the API reports a percentage as null, i.e.
+      // the ratio is undefined because its denominator was zero.
+      const UNAVAILABLE = "n/a";
+
+      // Renders a percentage from the API without inventing a number.
+      // Intl.NumberFormat#format(null) returns "0", so passing an undefined
+      // ratio straight through would publish a fully collateralised reserve as
+      // "0.00%". Anything that is not a finite number renders as UNAVAILABLE.
+      const formatPercent = (value, fractionDigits = 2) =>
+        typeof value === "number" && Number.isFinite(value)
+          ? `${numberFormat(fractionDigits).format(value)}%`
+          : UNAVAILABLE;
+
+      // Clamps a percentage to a CSS width. An undefined ratio collapses the bar
+      // to 0% rather than emitting the invalid declaration `width: null%`.
+      const percentWidth = (value) =>
+        typeof value === "number" && Number.isFinite(value)
+          ? `${Math.min(Math.max(value, 0), 100)}%`
+          : "0%";
+
       const setStatus = (label, tone = "") => {
         const status = document.getElementById("report-status");
         status.className = `tag${tone ? ` tag-${tone}` : ""}`;
@@ -1300,9 +1320,9 @@
 
       const renderReport = (report) => {
         const reserves = report.reserves;
-        const moneyPercent = numberFormat(2).format(reserves.managedMoneyMarket.percent);
-        const cashPercent = numberFormat(2).format(reserves.cash.percent);
-        const inventoryPercent = numberFormat(2).format(report.inventory.percentOfSupply);
+        const moneyPercent = formatPercent(reserves.managedMoneyMarket.percent);
+        const cashPercent = formatPercent(reserves.cash.percent);
+        const inventoryPercent = formatPercent(report.inventory.percentOfSupply);
         const reserveTotal = currencyFormat(2).format(Number(reserves.total));
         const moneyAmount = currencyFormat(2).format(Number(reserves.managedMoneyMarket.amount));
         const cashAmount = currencyFormat(2).format(Number(reserves.cash.amount));
@@ -1310,31 +1330,31 @@
         const refreshedAt = new Date(report.asOf).toISOString().slice(0, 16).replace("T", " ");
 
         setText("snapshot-time", `Live data · ${refreshedAt} UTC`);
-        setText("coverage-value", `${numberFormat(2).format(reserves.coveragePercent)}%`);
+        setText("coverage-value", formatPercent(reserves.coveragePercent));
         setText("reserve-total", reserveTotal);
         setText("supply-total", numberFormat(6).format(Number(report.supply.bridge)));
         setText("reserve-surplus", currencyFormat(2).format(Number(reserves.surplus)));
-        setText("money-market-percent", `${moneyPercent}%`);
+        setText("money-market-percent", moneyPercent);
         setText("money-market-amount", moneyAmount);
-        setText("cash-percent", `${cashPercent}%`);
+        setText("cash-percent", cashPercent);
         setText("cash-amount", cashAmount);
         setText("inventory-amount", inventoryAmount);
-        setText("inventory-percent", `${inventoryPercent}% of total supply`);
-        setText("money-market-row", `${moneyAmount} · ${moneyPercent}%`);
-        setText("cash-row", `${cashAmount} · ${cashPercent}%`);
+        setText("inventory-percent", `${inventoryPercent} of total supply`);
+        setText("money-market-row", `${moneyAmount} · ${moneyPercent}`);
+        setText("cash-row", `${cashAmount} · ${cashPercent}`);
         setText("reserve-total-row", reserveTotal);
-        setText("liquidity-target", `${numberFormat(2).format(report.liquidity.targetPercent)}%`);
-        setText("liquidity-copy", `Actual cash allocation is ${numberFormat(2).format(reserves.cash.percent)}%, closely tracking the configured target.`);
+        setText("liquidity-target", formatPercent(report.liquidity.targetPercent));
+        setText("liquidity-copy", `Actual cash allocation is ${cashPercent}, closely tracking the configured target.`);
         setText("allocation-minimum", String(report.liquidity.minimumRaw));
         setText("tempo-block", `Tempo block ${numberFormat(0).format(report.network.blockNumber)}`);
         setText("inventory-card-amount", `${inventoryAmount} pathUSD`);
-        setText("inventory-copy", `Available to Bridge's Orchestration system on Tempo. Inventory represents ${inventoryPercent}% of total pathUSD supply and is not added to reserve assets.`);
+        setText("inventory-copy", `Available to Bridge's Orchestration system on Tempo. Inventory represents ${inventoryPercent} of total pathUSD supply and is not added to reserve assets.`);
 
-        document.getElementById("composition-money").style.width = `${reserves.managedMoneyMarket.percent}%`;
-        document.getElementById("composition-cash").style.width = `${reserves.cash.percent}%`;
+        document.getElementById("composition-money").style.width = percentWidth(reserves.managedMoneyMarket.percent);
+        document.getElementById("composition-cash").style.width = percentWidth(reserves.cash.percent);
         document.getElementById("composition-chart").setAttribute(
           "aria-label",
-          `Reserve composition: ${moneyPercent}% managed money market and ${cashPercent}% cash`,
+          `Reserve composition: ${moneyPercent} managed money market and ${cashPercent} cash`,
         );
 
         if (report.supply.matchesOnchain) {
