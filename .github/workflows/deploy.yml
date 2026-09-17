@@ -30,7 +30,7 @@ jobs:
           node-version: 24
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@56.1.0
+        run: npm install --global vercel@56.1.0 # zizmor: ignore[adhoc-packages] version is pinned for this standalone deployment
 
       - name: Link Vercel project
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
