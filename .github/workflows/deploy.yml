@@ -12,19 +12,25 @@ concurrency:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@27b9d9cb079918e6be16c8660f82bb0cf7fef6ea
+
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@56.1.0
+        run: npm install --global vercel@56.1.0 # zizmor: ignore[adhoc-packages] version is pinned for this standalone deployment
 
       - name: Link Vercel project
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
