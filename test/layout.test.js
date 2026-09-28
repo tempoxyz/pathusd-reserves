@@ -21,6 +21,16 @@ test("simplified layout has unique IDs and all render targets exist", () => {
   assert.match(html, /id="reserve-total">—<\/p>/);
 });
 
+test("methodology links directly to the token's totalSupply method", () => {
+  const methodology = html.match(/<details class="methodology">([\s\S]*?)<\/details>/)[1];
+  const href = methodology.match(/<a href="([^"]+)">totalSupply\(\) on Tempo Explorer<\/a>/)[1];
+  const url = new URL(href);
+  assert.equal(url.origin, "https://explore.tempo.xyz");
+  assert.equal(url.pathname, "/address/0x20C0000000000000000000000000000000000000");
+  assert.equal(url.searchParams.get("tab"), "interact");
+  assert.equal(url.hash, "#totalSupply");
+});
+
 function start(ok) {
   const nodes = new Map();
   const paths = [];
