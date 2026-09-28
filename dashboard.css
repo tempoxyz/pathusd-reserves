@@ -11,6 +11,8 @@
   --body-font: Pilat, ui-sans-serif, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
+/* Keep the content width stable when scrollbars appear or captures hide them. */
+html { scrollbar-gutter: stable; }
 body { margin: 0; background: var(--page); color: var(--ink); font: 400 14px/1.6 var(--body-font); letter-spacing: .01em; }
 main { max-width: 1120px; padding: 56px 32px 40px; margin: auto; }
 h1, h2, h3, p { margin: 0; }

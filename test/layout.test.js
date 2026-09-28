@@ -6,6 +6,11 @@ const html = fs.readFileSync(require.resolve("../index.html"), "utf8");
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 
+test("page reserves its scrollbar gutter to keep horizontal spacing stable", () => {
+  const css = fs.readFileSync(require.resolve("../dashboard.css"), "utf8");
+  assert.match(css, /html\s*\{\s*scrollbar-gutter: stable;\s*\}/);
+});
+
 test("simplified layout has unique IDs and all render targets exist", () => {
   assert.equal(new Set(ids).size, ids.length);
   for (const match of script.matchAll(/(?:setText|document.getElementById)\("([^"]+)"/g)) {
