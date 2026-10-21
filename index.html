@@ -44,30 +44,25 @@
         </div>
       </section>
 
-      <div class="detail-grid">
-        <section aria-labelledby="composition-title">
-          <h2 id="composition-title">Reserve composition</h2>
-          <div class="composition-chart" id="composition-chart" role="img" aria-label="Reserve composition unavailable"><span class="composition-money" id="composition-money"></span><span class="composition-cash" id="composition-cash"></span></div>
-          <dl class="rows">
-            <div class="row"><dt><i class="swatch" aria-hidden="true"></i>Money market</dt><dd id="money-market-row">—</dd></div>
-            <div class="row"><dt><i class="swatch swatch-cash" aria-hidden="true"></i>Cash</dt><dd id="cash-row">—</dd></div>
-            <div class="row"><dt>Reserve surplus</dt><dd id="reserve-surplus">—</dd></div>
-          </dl>
-        </section>
-        <section aria-labelledby="network-title">
-          <h2 id="network-title">pathUSD on Tempo</h2>
-          <dl class="rows">
-            <div class="row"><dt>Bridge inventory</dt><dd id="inventory-card-amount">—</dd></div>
-            <div class="row"><dt>Observation</dt><dd id="tempo-block">—</dd></div>
-          </dl>
-          <p class="network-copy"><a class="address" href="https://explore.tempo.xyz/address/0x20C0000000000000000000000000000000000000">0x20C0000000000000000000000000000000000000</a></p>
-          <p class="network-copy" id="reconciliation-copy">Waiting for the contract supply observation.</p>
-        </section>
-      </div>
+      <section aria-labelledby="composition-title">
+        <h2 id="composition-title">Reserve composition</h2>
+        <div class="composition-chart" id="composition-chart" role="img" aria-label="Reserve composition unavailable"><span class="composition-money" id="composition-money"></span><span class="composition-cash" id="composition-cash"></span></div>
+        <dl class="rows">
+          <div class="row"><dt><i class="swatch" aria-hidden="true"></i>Money market</dt><dd id="money-market-row">—</dd></div>
+          <div class="row"><dt><i class="swatch swatch-cash" aria-hidden="true"></i>Cash</dt><dd id="cash-row">—</dd></div>
+          <div class="row"><dt>Reserve surplus</dt><dd id="reserve-surplus">—</dd></div>
+        </dl>
+      </section>
 
       <details class="methodology">
         <summary>Sources and methodology</summary>
         <div class="method-content">
+          <dl class="rows">
+            <div class="row"><dt>Bridge inventory</dt><dd id="inventory-card-amount">—</dd></div>
+            <div class="row"><dt>Supply source block</dt><dd id="tempo-block">—</dd></div>
+          </dl>
+          <p>pathUSD contract: <a class="address" href="https://explore.tempo.xyz/address/0x20C0000000000000000000000000000000000000">0x20C0000000000000000000000000000000000000</a></p>
+          <p id="reconciliation-copy">Waiting for the contract supply observation.</p>
           <p>This dashboard is informational, not an independent reserve attestation. Reserve responses cache for five minutes and may be served stale for up to an hour while revalidating. Daily history caches hourly.</p>
           <p>Bridge reports pathUSD reserves, supply and orchestration inventory. Inventory is not added to reserve assets. Reserve coverage compares reported USD assets with token supply; the onchain check uses totalSupply() at the displayed Tempo block.</p>
           <dl class="rows"><div class="row"><dt>Configured cash target</dt><dd id="liquidity-target">—</dd></div><div class="row"><dt>Allocation minimum (raw units)</dt><dd id="allocation-minimum">—</dd></div></dl><p id="liquidity-copy">Waiting for cash allocation.</p><p>Bridge does not document the allocation minimum's unit, so no dollar value is assigned.</p><p id="inventory-copy">Waiting for Bridge inventory.</p>

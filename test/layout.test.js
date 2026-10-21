@@ -31,12 +31,21 @@ test("methodology links directly to the token's totalSupply method", () => {
   assert.equal(url.hash, "#totalSupply");
 });
 
+test("full-width composition keeps network details inside methodology", () => {
+  const methodology = html.match(/<details class="methodology">([\s\S]*?)<\/details>/)[1];
+  assert.doesNotMatch(html, /detail-grid|network-title|pathUSD on Tempo/);
+  for (const id of ["tempo-block", "inventory-card-amount", "reconciliation-copy"]) {
+    assert.ok(methodology.includes(`id="${id}"`));
+  }
+});
+
 function start(ok) {
   const nodes = new Map();
   const paths = [];
   const element = () => ({
     textContent: "", style: {}, clientWidth: 400,
-    append() {}, replaceChildren() {},
+    set innerHTML(value) { this.textContent = ""; },
+    append(text) { this.textContent += text; }, replaceChildren() {},
     setAttribute(name, value) { if (name === "d") paths.push(value); },
   });
   const get = id => {
@@ -67,6 +76,10 @@ test("populated and zero-volume charts render without invalid coordinates", asyn
   assert.equal(get("reserve-total").textContent, "$1,001.00");
   assert.equal(get("coverage-value").textContent, "100.10%");
   assert.equal(get("volume-chart-value").textContent, "$0.00");
+  assert.equal(get("report-status").textContent, "Live · supply mismatch");
+  assert.equal(get("tempo-block").textContent, "Tempo block 16");
+  assert.equal(get("inventory-card-amount").textContent, "10.00 pathUSD");
+  assert.equal(get("reconciliation-copy").textContent, "Bridge reports 1000 pathUSD while the contract reports 500 at the reported Tempo block.");
   assert.ok(paths.length >= 4);
   for (const value of paths) assert.doesNotMatch(value, /NaN|Infinity/);
 });

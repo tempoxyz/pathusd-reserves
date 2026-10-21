@@ -57,8 +57,6 @@ section { margin-top: 32px; }
 .chart-tooltip { position: absolute; transform: translate(-50%, -120%); background: var(--ink); color: var(--page); border-radius: 4px; padding: 6px 10px; white-space: nowrap; font-size: 12px; pointer-events: none; z-index: 1; max-width: 100%; }
 .chart-tooltip[hidden] { display: none; }
 .chart-note { margin-top: 12px; color: var(--muted); font-size: 12px; }
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-.detail-grid section { min-width: 0; }
 .rows { margin: 0; }
 .row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .row dt { color: var(--muted); }
@@ -69,7 +67,6 @@ section { margin-top: 32px; }
 .swatch { display: inline-block; width: 8px; height: 8px; margin-right: 8px; background: var(--accent); border-radius: 1px; }
 .swatch-cash { background: color-mix(in oklch, var(--accent) 25%, var(--page)); }
 .address { overflow-wrap: anywhere; font-size: 12px; font-family: ui-monospace, monospace; }
-.network-copy { font-size: 12px; color: var(--muted); margin-top: 12px; }
 .methodology { margin-top: 32px; border-top: 1px solid var(--line); }
 summary { cursor: pointer; padding: 20px 0; font-weight: 500; }
 .method-content { max-width: 800px; display: grid; gap: 12px; padding-bottom: 16px; color: var(--muted); font-size: 13px; }
@@ -85,8 +82,7 @@ summary { cursor: pointer; padding: 20px 0; font-weight: 500; }
   .stat, .stat:first-child { padding: 16px 0; border-left: 0; border-bottom: 1px solid var(--line); }
   .stat:last-child { border-bottom: 0; }
   .stat-value { font-size: 32px; }
-  .trend-grid, .detail-grid { grid-template-columns: 1fr; gap: 16px; }
-  .detail-grid { gap: 0; }
+  .trend-grid { grid-template-columns: 1fr; gap: 16px; }
   .trend-card { padding: 16px; }
   .trend-value { font-size: 22px; }
   .chart-tooltip { font-size: 10px; }
