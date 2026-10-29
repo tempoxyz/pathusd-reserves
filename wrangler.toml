@@ -7,8 +7,8 @@ workers_dev = true
 preview_urls = true
 
 # BRIDGE_API_KEY and SNOWFLAKE_{ACCOUNT,USER,PRIVATE_KEY,WAREHOUSE,ROLE} are
-# native Worker secrets; broker deployments inherit them. See
-# scripts/migrate-vercel-secrets.mjs.
+# native Worker secrets, managed with `wrangler secret`; broker deployments
+# inherit them.
 
 [version_metadata]
 binding = "CF_VERSION_METADATA"
