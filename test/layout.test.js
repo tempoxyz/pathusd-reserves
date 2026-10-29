@@ -2,12 +2,12 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const fs = require("node:fs");
 const vm = require("node:vm");
-const html = fs.readFileSync(require.resolve("../index.html"), "utf8");
+const html = fs.readFileSync(require.resolve("../public/index.html"), "utf8");
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 
 test("page reserves its scrollbar gutter to keep horizontal spacing stable", () => {
-  const css = fs.readFileSync(require.resolve("../dashboard.css"), "utf8");
+  const css = fs.readFileSync(require.resolve("../public/dashboard.css"), "utf8");
   assert.match(css, /html\s*\{\s*scrollbar-gutter: stable;\s*\}/);
 });
 
