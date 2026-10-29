@@ -11,12 +11,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
-# A newer push cancels a pull request's older preview deploy, but closing waits
-# for it: the broker completes a deploy it accepted even after its job is
-# cancelled, which would recreate a deleted preview.
+# One run per pull request at a time, never cancelled: the broker completes
+# work a cancelled job started, so an overlapping deploy could recreate a
+# deleted preview, or a cleanup delete a reopened one. A newer pending run
+# still replaces an older pending one, so pushes collapse.
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('cloudflare-preview-{0}', github.event.pull_request.number) || 'cloudflare-production' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+  group: ${{ github.event_name == 'pull_request' && format('{0}-preview-{1}', github.workflow, github.event.pull_request.number) || 'cloudflare-production' }}
+  cancel-in-progress: false
 
 permissions: {}
 
