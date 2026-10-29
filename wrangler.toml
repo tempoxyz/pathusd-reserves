@@ -4,7 +4,7 @@ account_id = "ba6ee3674b03f08481e57ff9992c601e"
 compatibility_date = "2026-09-15"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
-preview_urls = false
+preview_urls = true
 
 # BRIDGE_API_KEY and SNOWFLAKE_{ACCOUNT,USER,PRIVATE_KEY,WAREHOUSE,ROLE} are
 # native Worker secrets; broker deployments inherit them. See
