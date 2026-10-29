@@ -1,0 +1,56 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  build:
+    permissions:
+      actions: write
+      artifact-metadata: write
+      attestations: write
+      contents: read
+      id-token: write
+    uses: tempoxyz/gh-actions/.github/workflows/cloudflare-deploy-broker-build.yml@0319990f50971b44f0e7d6ac03f080323ca22178 # 2026-10-28T23-57-40Z-0319990f
+    with:
+      artifact-name: pathusd-reserves
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@0319990f50971b44f0e7d6ac03f080323ca22178 # 2026-10-28T23-57-40Z-0319990f
+
+      - name: Deploy through the broker
+        id: broker
+        uses: tempoxyz/gh-actions/actions/cloudflare-deploy-broker@0319990f50971b44f0e7d6ac03f080323ca22178 # 2026-10-28T23-57-40Z-0319990f
+        with:
+          deployment-id: pathusd-reserves
+          artifact-id: ${{ needs.build.outputs.artifact-id }}
+          archive-digest: ${{ needs.build.outputs.archive-digest }}
+          module-digest: ${{ needs.build.outputs.module-digest }}
+
+      - name: Summarize deployment
+        env:
+          VERIFICATION_URL: ${{ steps.broker.outputs.verification-url }}
+          VERSION_ID: ${{ steps.broker.outputs.version-id }}
+        run: |
+          {
+            echo "Deployed version \`${VERSION_ID}\`"
+            echo
+            echo "${VERIFICATION_URL}"
+          } >> "$GITHUB_STEP_SUMMARY"

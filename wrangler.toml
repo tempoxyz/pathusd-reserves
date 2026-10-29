@@ -1,0 +1,22 @@
+name = "pathusd-reserves"
+main = "src/worker.mjs"
+account_id = "ba6ee3674b03f08481e57ff9992c601e"
+compatibility_date = "2026-09-15"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = false
+
+# BRIDGE_API_KEY and SNOWFLAKE_{ACCOUNT,USER,PRIVATE_KEY,WAREHOUSE,ROLE} are
+# native Worker secrets; broker deployments inherit them. See
+# scripts/migrate-vercel-secrets.mjs.
+
+[version_metadata]
+binding = "CF_VERSION_METADATA"
+
+[observability]
+enabled = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = false
