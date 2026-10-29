@@ -11,12 +11,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
-# A newer push cancels a pull request's older preview deploy, but closing waits
-# for it: the broker completes a deploy it accepted even after its job is
-# cancelled, which would recreate a deleted preview.
+# One run per pull request at a time, never cancelled: the broker completes
+# work a cancelled job started, so an overlapping deploy could recreate a
+# deleted preview, or a cleanup delete a reopened one. A newer pending run
+# still replaces an older pending one, so pushes collapse.
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('cloudflare-preview-{0}', github.event.pull_request.number) || 'cloudflare-production' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+  group: ${{ github.event_name == 'pull_request' && format('{0}-preview-{1}', github.workflow, github.event.pull_request.number) || 'cloudflare-production' }}
+  cancel-in-progress: false
 
 permissions: {}
 
@@ -74,11 +75,14 @@ jobs:
       id-token: write
     steps:
       - name: Secure runner
-        uses: tempoxyz/gh-actions/actions/secure-runner@6c2beb6fb8f2471ba859eb666b907389acc5fc8b # 2026-10-29T05-55-18Z-6c2beb6f
+        uses: tempoxyz/gh-actions/actions/secure-runner@2f7879fb614d36e3d2c80c8a14b3abdb33ff1085 # 2026-10-29T06-43-04Z-2f7879fb
 
       - name: Delete the pull request's preview
-        uses: tempoxyz/gh-actions/actions/cloudflare-deploy-broker-delete-preview@6c2beb6fb8f2471ba859eb666b907389acc5fc8b # 2026-10-29T05-55-18Z-6c2beb6f
+        uses: tempoxyz/gh-actions/actions/cloudflare-deploy-broker-delete-preview@2f7879fb614d36e3d2c80c8a14b3abdb33ff1085 # 2026-10-29T06-43-04Z-2f7879fb
         with:
           deployment-id: pathusd-reserves
           account-id: ba6ee3674b03f08481e57ff9992c601e
           worker-name: pathusd-reserves
+          # A merged pull request's closing run is on main, without a pull
+          # request ref, so it names the preview.
+          preview-name: pr-${{ github.event.pull_request.number }}
