@@ -5,15 +5,20 @@ on:
     branches:
       - main
   workflow_dispatch:
+  # Same-repository pull requests deploy an isolated Cloudflare Preview, never
+  # production; the broker decides from the run's verified identity.
+  pull_request:
 
 concurrency:
-  group: cloudflare-production
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('cloudflare-preview-{0}', github.event.pull_request.number) || 'cloudflare-production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions: {}
 
 jobs:
   build:
+    # GitHub issues no OIDC token to fork pull requests, so they cannot deploy.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       actions: write
       artifact-metadata: write
@@ -46,11 +51,12 @@ jobs:
 
       - name: Summarize deployment
         env:
+          KIND: ${{ github.event_name == 'pull_request' && 'preview deployment' || 'version' }}
           VERIFICATION_URL: ${{ steps.broker.outputs.verification-url }}
           VERSION_ID: ${{ steps.broker.outputs.version-id }}
         run: |
           {
-            echo "Deployed version \`${VERSION_ID}\`"
+            echo "Deployed ${KIND} \`${VERSION_ID}\`"
             echo
             echo "${VERIFICATION_URL}"
           } >> "$GITHUB_STEP_SUMMARY"
