@@ -6,19 +6,24 @@ on:
       - main
   workflow_dispatch:
   # Same-repository pull requests deploy an isolated Cloudflare Preview, never
-  # production; the broker decides from the run's verified identity.
+  # production; the broker decides from the run's verified identity. Closing
+  # the pull request deletes its preview.
   pull_request:
+    types: [opened, synchronize, reopened, closed]
 
+# A newer push cancels a pull request's older preview deploy, but closing waits
+# for it: the broker completes a deploy it accepted even after its job is
+# cancelled, which would recreate a deleted preview.
 concurrency:
   group: ${{ github.event_name == 'pull_request' && format('cloudflare-preview-{0}', github.event.pull_request.number) || 'cloudflare-production' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
 
 permissions: {}
 
 jobs:
   build:
     # GitHub issues no OIDC token to fork pull requests, so they cannot deploy.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.action != 'closed')
     permissions:
       actions: write
       artifact-metadata: write
@@ -60,3 +65,20 @@ jobs:
             echo
             echo "${VERIFICATION_URL}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  delete-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+    steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@6c2beb6fb8f2471ba859eb666b907389acc5fc8b # 2026-10-29T05-55-18Z-6c2beb6f
+
+      - name: Delete the pull request's preview
+        uses: tempoxyz/gh-actions/actions/cloudflare-deploy-broker-delete-preview@6c2beb6fb8f2471ba859eb666b907389acc5fc8b # 2026-10-29T05-55-18Z-6c2beb6f
+        with:
+          deployment-id: pathusd-reserves
+          account-id: ba6ee3674b03f08481e57ff9992c601e
+          worker-name: pathusd-reserves
