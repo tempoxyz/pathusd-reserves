@@ -5,6 +5,12 @@ compatibility_date = "2026-09-15"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 preview_urls = true
+# Custom domains need the pathusd.fyi zone in this account, with no other
+# apex or www records. www redirects to the apex in the Worker.
+routes = [
+  { pattern = "pathusd.fyi", custom_domain = true },
+  { pattern = "www.pathusd.fyi", custom_domain = true },
+]
 
 # BRIDGE_API_KEY and SNOWFLAKE_{ACCOUNT,USER,PRIVATE_KEY,WAREHOUSE,ROLE} are
 # native Worker secrets, managed with `wrangler secret`; broker deployments
@@ -19,4 +25,5 @@ enabled = true
 [assets]
 directory = "./public"
 binding = "ASSETS"
-run_worker_first = false
+# The Worker runs first so www hosts redirect before assets are served.
+run_worker_first = true
