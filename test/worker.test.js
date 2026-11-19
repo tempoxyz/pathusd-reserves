@@ -11,6 +11,17 @@ test("worker serves static assets for non-API paths", async () => {
   assert.equal(await response.text(), "/dashboard.css");
 });
 
+test("worker redirects www hosts to their apex, keeping the path and query", async () => {
+  const { default: worker } = await import("../src/worker.mjs");
+  const request = new Request("https://www.pathusd.fyi/api/history?range=30d");
+  const env = { ASSETS: { fetch: async () => assert.fail("www requests must not reach assets") } };
+
+  const response = await worker.fetch(request, env, {});
+
+  assert.equal(response.status, 308);
+  assert.equal(response.headers.get("Location"), "https://pathusd.fyi/api/history?range=30d");
+});
+
 test("worker adapts the Vercel API handlers to Responses", async () => {
   const { default: worker } = await import("../src/worker.mjs");
   const request = new Request("https://pathusd-reserves.example/api/reserves", { method: "POST" });

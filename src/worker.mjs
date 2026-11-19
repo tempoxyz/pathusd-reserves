@@ -1,9 +1,9 @@
 import history from "../api/history.js";
 import reserves from "../api/reserves.js";
 
-// Static files are served from ./public before this Worker runs. The API
-// handlers keep their Vercel (request, response) signature, read secrets from
-// process.env (populated by nodejs_compat), and run here through a small adapter.
+// The Worker runs before static files from ./public, so www hosts can redirect.
+// The API handlers keep their Vercel (request, response) signature, read secrets
+// from process.env (populated by nodejs_compat), and run here through a small adapter.
 const routes = {
   "/api/history": history,
   "/api/reserves": reserves,
@@ -11,7 +11,14 @@ const routes = {
 
 export default {
   async fetch(request, env, ctx) {
-    const handler = routes[new URL(request.url).pathname];
+    const url = new URL(request.url);
+    // www hosts permanently redirect to their apex, keeping the path and query.
+    if (url.hostname.startsWith("www.")) {
+      url.hostname = url.hostname.slice(4);
+      return Response.redirect(url, 308);
+    }
+
+    const handler = routes[url.pathname];
     if (!handler) return env.ASSETS.fetch(request);
 
     if (request.method !== "GET") return runVercelHandler(handler, request);
